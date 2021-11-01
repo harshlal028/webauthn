@@ -1,4 +1,4 @@
-Discussion issue: https://github.com/w3c/webauthn/issues/1637<br>
+Discussion issue and more detailed roadmap: https://github.com/w3c/webauthn/issues/1637<br>
 Author: agl
 
 ### Introduction
