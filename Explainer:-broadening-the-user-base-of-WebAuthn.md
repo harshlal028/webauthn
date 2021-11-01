@@ -37,7 +37,7 @@ But there are several changes to the Web Platform that would be critical to maki
 
 Sites are going to start with a user population that probably all use passwords. WebAuthn calls currently trigger modal UI that expects that a user knows what to do, but that's far too abrupt for a transition from passwords. Thus we suggest that an existing field of the CredMan spec be used to allow sites to request a more subtle UI that accommodates users who might not have WebAuthn credentials. As a browser, we expect to integrate that with our auto-complete system.
 
-This has its [own issue](https://github.com/w3c/webauthn/pull/1576) and a [separate explainer](https://docs.google.com/document/d/11hWpUPAnblPtkn1f7AIQW0ujoiu_BAKzlMVhZKQPiW8/edit).  
+This has its [own issue](https://github.com/w3c/webauthn/pull/1576) and a [separate explainer](https://docs.google.com/document/d/11hWpUPAnblPtkn1f7AIQW0ujoiu_BAKzlMVhZKQPiW8/edit). A separate TAG review request will be filed for the CredMan changes involved in this.
 
 *Alternatives*: several sites have requested a silent API to learn whether the current user is known to have WebAuthn credentials or not. However, this solution would change the privacy model of WebAuthn. An eariler draft of the idea had a non-modal pop-up appear at the top of the browser window, but this offers fewer opportunities for integration with other sign-in methods and wasn't gated behind a user gesture.
 
