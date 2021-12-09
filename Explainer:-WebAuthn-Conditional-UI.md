@@ -93,7 +93,13 @@ To be able to enumerate credentials before user interaction, silent discovery mu
 ## Privacy considerations
 For password and federated credentials, [the Credential Management API does not prescribe behaviour to prevent a website from being able to tell no credentials are stored](https://w3c.github.io/webappsec-credential-management/#security-timing) (vs the user not consenting to share a credential), giving a potentially malicious website information on their user. WebAuthn [is explicit about making it impossible for websites to determine this](https://w3c.github.io/webauthn/#sctn-assertion-privacy). Use of the conditional UI should follow the stronger WebAuthn requirement.
 
-To ensure this, the user agent won't return an error if the user selects a credential and then cancels the authentication flow or it fails (e.g. because a fingerprint couldn't be read). Unlike vanilla WebAuthn, we can't rely on the error being indistinguishable from a timeout or no credentials being present at all.
+To ensure this, the user agent won't return an error (in fact, nothing will be returned at all) for any of these cases:
+* There are no valid credentials for the user.
+* The user selects a credential and then cancels the authentication flow.
+* The user selects a credential and authentication fails (e.g. because a fingerprint couldn't be read).
+* The user does not select a WebAuthn credential (e.g. they select a password, or they don't select anything at all).
+
+Since the user agent won't be returning anything, all of these cases will be indistinguishable.
 
 ## Specs & other documents
 * [Chrome Demo](https://webauthn-conditional-ui-demo.glitch.me/) (might not be up-to-date with the standards)
