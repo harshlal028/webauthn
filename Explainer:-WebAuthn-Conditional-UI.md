@@ -9,6 +9,8 @@ _Last updated: 09-Dec-2021_
 ## Summary
 A new mode for [WebAuthn](https://w3c.github.io/webauthn/) that displays a credential selection UI only if the user has a [discoverable credential](#discoverable-credential) registered with the [Relying Party](#relying-party) on their authenticator. The credential is displayed alongside autofilled passwords. This solves the bootstrapping problem when replacing traditional username and password with WebAuthn: websites can fire a WebAuthn call while showing a regular password prompt without worrying about showing a modal dialog error if the device lacks appropriate credentials.
 
+This feature is part of an [overarching push to broaden the user-base of WebAuthn](https://github.com/w3c/webauthn/wiki/Explainer:-broadening-the-user-base-of-WebAuthn).
+
 ## Background
 WebAuthn is a complex authentication API that allows users to log-in to websites using pieces of hardware known as authenticators. Authenticators can either be built-into a platform (such as a fingerprint reader on a laptop) or roaming (such as a USB security key). 
 WebAuthn satisfies two use cases:
