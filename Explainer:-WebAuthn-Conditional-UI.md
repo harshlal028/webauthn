@@ -70,7 +70,7 @@ _site.html_
 _site.js_
 
 ```javascript
-if (PublicKeyCredential.isConditionalMediationAvailable()) {
+if (!PublicKeyCredential.isConditionalMediationAvailable()) {
   return;
 }
 
