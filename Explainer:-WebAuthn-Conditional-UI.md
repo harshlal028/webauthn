@@ -23,7 +23,7 @@ The first use case is essentially solved and we've seen good buy in from the eco
 
 [WebAuthn is designed to make it impossible to query for credential availability](https://w3c.github.io/webauthn/#sctn-assertion-privacy) without going through a complete, modal dialog heavy, authentication flow. If a website doesn't know whether a registered authenticator is available on the device the user is attempting to log-in with, what should it do? Relying parties don't want to fire a WebAuthn request if there's a good chance the user doesn't have credentials available on that device because it will fail right away, and disrupt the user's task flow:
 
-![Dialog shown when there are no Touch ID credentials on the device](https://lh5.googleusercontent.com/Ok1x6R0iNF2sqn9yHx7HkEKD2H0II0VbEqMuM2u1MgtGnvGT6Vai2jYTc0lyluC-jaJMZMeZgsJQw219LS_I=w2005-h1269)
+![Dialog shown when there are no Touch ID credentials on the device](images/webauthn_no_credentials_error.png)
 
 _Dialog shown when there are no Touch ID credentials on the device_
 
@@ -41,7 +41,9 @@ A clean solution is to provide an API that shows a WebAuthn UI only if we know i
 
 In theory we could implement this conditional UI reusing the various platforms' existing WebAuthn dialogs. However, all platform authenticators, when triggered, show a very prominent UI on top of everything on the screen. Due to the fact that some authenticators don't expose credential data until the user has interacted with them, and that current WebAuthn implementations use the same UI for all cases, browsers default to prompting for a touch before asking the user to pick a credential. This does not integrate well with relying parties' existing password-based sign-in, and can confuse users. Conditional UI addresses this situation by displaying available credentials in the password autofill before the user is prompted—via the underlying OS's dialog(s)—to interact with their platform authenticator. 
 
-![](https://lh4.googleusercontent.com/KLAN9ZFRt7NZYwJ7ERTZaJJXHEg2gYrpFUWFftdux8G88Ub75CVTS3N6DbkBfZDmqC0aQ8PoxYDTHDmmlpGb=w2005-h1269)
+![Dialog showing a WebAuthn credential displayed on an autofill prompt](images/webauthn_conditional_ui_mock.png)
+
+_Dialog showing a WebAuthn credential displayed on an autofill prompt_
 
 We still want to support traditional security keys with this flow. For this example, clicking "Sign in with another device..." would open the regular WebAuthn dialog. Requests to plugged in security keys would be dispatched like normal even if the user doesn't click the button. Security keys requiring UI interaction (e.g. PIN entry) would trigger the same UI flow as a normal WebAuthn request.
 Credential registration is out of scope for this feature and will happen through the existing WebAuthn flow.
