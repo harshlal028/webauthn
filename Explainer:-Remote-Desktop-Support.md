@@ -1,4 +1,4 @@
-# Explainer: WebAuthn Remote Desktop Support
+# WebAuthn Remote Desktop Support Explainer
 
 **Author:** Martin Kreichgauer <[martinkr@google.com](mailto:martinkr@google.com)>
 
