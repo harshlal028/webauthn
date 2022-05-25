@@ -1,4 +1,4 @@
-| SCENARIO | CRED TYPE     | CRED ATTESTED? | DPK | DPK ATTESTED? |
+| # | CRED TYPE     | CRED ATTESTED? | DPK | DPK ATTESTED? |
 |----------|---------------|----------------|-----|---------------|
 | 1        | Single-device | yes            | no  | no            |
 | 2        | Single-device | yes            | yes | no            |
