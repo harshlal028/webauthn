@@ -4,7 +4,7 @@ Nina Satragno \<nsatragno@chromium.org\>
 
 Jeff Hodges \<jdhodges@chromium.org\>
 
-_Last updated: 09-Dec-2021_
+_Last updated: 10-Jun-2022_
 
 ## Summary
 A new mode for [WebAuthn](https://w3c.github.io/webauthn/) that displays a credential selection UI only if the user has a [discoverable credential](#discoverable-credential) registered with the [Relying Party](#relying-party) on their authenticator. The credential is displayed alongside autofilled passwords. This solves the bootstrapping problem when replacing traditional username and password with WebAuthn: websites can fire a WebAuthn call while showing a regular password prompt without worrying about showing a modal dialog error if the device lacks appropriate credentials.
@@ -54,25 +54,30 @@ Credential registration is out of scope for this feature and will happen through
 
 **The relying party must be able to test whether the conditional UI is available in a way that doesn't cause a user-visible error if the feature is not supported.** Adding a static `isConditionalMediationAvailable()` method to the Credential interface will satisfy this need.
 
-A set of HTML autofill "webauthn" tokens are added to instruct the user-agent to fill webauthn credentials that may satisfy an ongoing request.
+An HTML autofill "webauthn" token is added to instruct the user-agent to fill webauthn credentials that may satisfy an ongoing request.
 
 * "webauthn": interacting with this field should display WebAuthn credentials for the current ongoing request.
-  * "webauthn name": same as "webauthn", and also autofill with the PublicKeyCredentialUserEntity.name
-  * "webauthn display-name": same as "webauthn", and also autofill with the PublicKeyCredentialUserEntity.displayName
+
+These tokens can be combined with existing autofill tokens, like so:
+* "webauthn username": same as "webauthn", and also offer autofilling a user's name
+* "webauthn password": same as "webauthn", and also autofill a user's surname
+
+etc.
 
 _site.html_
 
 ```html
 <label for="name">Username:</label>
-<input type="text" name="name" autofill="webauthn name">
+<input type="text" name="name" autocomplete="webauthn username">
 <label for="password">Password:</label>
-<input type="password" name="password" autofill="webauthn">
+<input type="password" name="password" autocomplete="webauthn password">
 ```
 
 _site.js_
 
 ```javascript
-if (!PublicKeyCredential.isConditionalMediationAvailable()) {
+if (!PublicKeyCredential.isConditionalMediationAvailable ||
+    !PublicKeyCredential.isConditionalMediationAvailable()) {
   return;
 }
 
