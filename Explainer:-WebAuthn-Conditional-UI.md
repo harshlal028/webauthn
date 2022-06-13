@@ -56,11 +56,11 @@ Credential registration is out of scope for this feature and will happen through
 
 An HTML autofill "webauthn" token is added to instruct the user-agent to fill webauthn credentials that may satisfy an ongoing request.
 
-* "webauthn": interacting with this field should display WebAuthn credentials for the current ongoing request.
+* "webauthn": interacting with this field should display WebAuthn credentials for the current ongoing request. The user agent may choose to display other autofill values in addition to WebAuthn credentials.
 
 These tokens can be combined with existing autofill tokens, like so:
-* "webauthn username": same as "webauthn", and also offer autofilling a user's name
-* "webauthn password": same as "webauthn", and also autofill a user's surname
+* "username webauthn": same as "webauthn", and also offer autofilling a user's name
+* "password webauthn": same as "webauthn", and also autofill a user's surname
 
 etc.
 
@@ -68,9 +68,9 @@ _site.html_
 
 ```html
 <label for="name">Username:</label>
-<input type="text" name="name" autocomplete="webauthn username">
+<input type="text" name="name" autocomplete="username webauthn">
 <label for="password">Password:</label>
-<input type="password" name="password" autocomplete="webauthn password">
+<input type="password" name="password" autocomplete="password webauthn">
 ```
 
 _site.js_
