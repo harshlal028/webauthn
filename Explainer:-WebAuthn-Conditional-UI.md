@@ -60,7 +60,7 @@ An HTML autofill "webauthn" token is added to instruct the user-agent to fill we
 
 These tokens can be combined with existing autofill tokens, like so:
 * "username webauthn": same as "webauthn", and also offer autofilling a user's name
-* "password webauthn": same as "webauthn", and also autofill a user's surname
+* "current-password webauthn": same as "webauthn", and also autofill a user's surname
 
 etc.
 
@@ -70,7 +70,7 @@ _site.html_
 <label for="name">Username:</label>
 <input type="text" name="name" autocomplete="username webauthn">
 <label for="password">Password:</label>
-<input type="password" name="password" autocomplete="password webauthn">
+<input type="password" name="password" autocomplete="current-password webauthn">
 ```
 
 _site.js_
