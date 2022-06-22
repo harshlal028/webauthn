@@ -97,6 +97,11 @@ navigator.credentials.get({
 ### Silently discoverable credentials
 To be able to enumerate credentials before user interaction, silent discovery must be supported by the authenticator. This refers to the ability for user agents to query credential existence before requiring a user gesture. Security keys already support this for non credprotect credentials.
 
+### Empty `allowCredentials`
+Conditional UI only allows empty `allowCredentials` lists. This is because authenticators are not required to store user data (like name, display name) for non-discoverable credentials (and they are outright disallowed for stateless credentials). This would make displaying them with autofill data difficult. Even if an authenticator has credentials matching the allow list, the user agent might not have a way to silently discover their availability, which is the case for Windows.
+
+The only advantage from calling Conditional UI with `allowCredentials` would be a "Sign in with another device..." (or similar) button on the autofill prompt. This is no better than the RP showing themselves a button that fires the regular WebAuthn flow. We can revisit this later if there are compelling use cases.
+
 ## Privacy considerations
 For password and federated credentials, [the Credential Management API does not prescribe behaviour to prevent a website from being able to tell no credentials are stored](https://w3c.github.io/webappsec-credential-management/#security-timing) (vs the user not consenting to share a credential), giving a potentially malicious website information on their user. WebAuthn [is explicit about making it impossible for websites to determine this](https://w3c.github.io/webauthn/#sctn-assertion-privacy). Use of the conditional UI should follow the stronger WebAuthn requirement.
 
