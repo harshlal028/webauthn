@@ -4,7 +4,7 @@ Nina Satragno \<nsatragno@chromium.org\>
 
 Jeff Hodges \<jdhodges@chromium.org\>
 
-_Last updated: 10-Jun-2022_
+_Last updated: 08-Aug-2022_
 
 ## Summary
 A new mode for [WebAuthn](https://w3c.github.io/webauthn/) that displays a credential selection UI only if the user has a [discoverable credential](#discoverable-credential) registered with the [Relying Party](#relying-party) on their authenticator. The credential is displayed alongside autofilled passwords. This solves the bootstrapping problem when replacing traditional username and password with WebAuthn: websites can fire a WebAuthn call while showing a regular password prompt without worrying about showing a modal dialog error if the device lacks appropriate credentials.
