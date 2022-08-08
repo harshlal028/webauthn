@@ -117,7 +117,7 @@ Since the user agent won't be returning anything, all of these cases will be ind
 * [Chrome Demo](https://webauthn-conditional-ui-demo.glitch.me/) (might not be up-to-date with the standards)
 * [WebAuthn specification change](https://github.com/w3c/webauthn/pull/1576)
 * [Credential Management spec changes](https://github.com/w3c/webappsec-credential-management/pull/155)
-* TODO: html spec change
+* [HTML spec](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-autocomplete-webauthn)
 * [Chromium design doc](https://docs.google.com/document/d/1KzEWP0aoLMZ0asfw6d3-7UHJ6csTtxLA478EgptCvkk/edit#heading=h.7nki9mck5t64) (basically this document with a lot more chromium-specific details)
 
 ## Glossary
