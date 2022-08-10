@@ -2,7 +2,7 @@
 
 **Author:** Martin Kreichgauer <[martinkr@google.com](mailto:martinkr@google.com)>
 
-**Last update:** April 6, 2022
+**Last update:** August 9, 2022
 
 ## Motivation
 
@@ -39,9 +39,22 @@ navigator.credentials.get({publicKey: {
 }});
 ```
 
-The two extension members, `origin` and `sameOriginWithAncestors`, replace the arguments of the same names when invoking [`PublicKeyCredential`'s `[[[DiscoverFromExternalSource]]` internal method](https://w3c.github.io/webauthn/#dom-publickeycredential-discoverfromexternalsource-slot). This causes the user agent to match the scope of the RP ID against the overridden origin (https://accounts.example.com), rather than the origin of the Relying Party (https://myrdc.example). The supplied values are also used to assemble the [`CollectedClientData` dictionary](https://w3c.github.io/webauthn/#dictionary-client-data) that the authenticator signs over when generating an assertion. (The remaining `CollectedClientData` members can be inferred from context and therefore don't need to be injected.) To the Relying Party, the response should be indistinguishable from one that would have been generated without forwarding.
+The two extension members, `origin` and `sameOriginWithAncestors`, replace the arguments of the same names when invoking [`PublicKeyCredential`'s `[[[DiscoverFromExternalSource]]` internal method](https://w3c.github.io/webauthn/#dom-publickeycredential-discoverfromexternalsource-slot). This causes the user agent to match the scope of the RP ID against the overridden origin (https://accounts.example.com), rather than the origin of the Relying Party (https://myrdc.example). The supplied values are also used to assemble the [`CollectedClientData` dictionary](https://w3c.github.io/webauthn/#dictionary-client-data) that the authenticator signs over when generating an assertion. (The remaining `CollectedClientData` members can be inferred from context and therefore don't need to be injected.) 
 
 Extension processing would be analogous for WebAuthn create() calls: Presence of the extension causes the equivalent arguments to the [`[[Create]]` internal method](https://w3c.github.io/webauthn/#sctn-createCredential) to be overridden, such that the request is processed as if it had been made by the Relying Party origin on the remote host.
+
+Browser supporting remoteDesktopClientOverride may choose to signal its use to the Relying Party by including the origin of the remote desktop client that issued the proxied request in the `CollectedClientData`. For example:
+
+```
+{
+    challenge: "...",
+    origin: "https://example.com",
+    remoteDesktopClientOrigin: "https://exampleremotedesktopclient.net",
+    type: "webauthn.create"
+}
+```
+
+Disclosing the origin of the remote desktop client to the Relying Party in this way is not desirable in the general case for privacy reasons. It can be suitable for a Relying Party that wishes to place restrictions on which remote desktop client origins it permits to forward WebAuthn requests on its own enterprise managed devices.
 
 ## Security Considerations
 
