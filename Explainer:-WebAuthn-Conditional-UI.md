@@ -45,7 +45,8 @@ In theory we could implement this conditional UI reusing the various platforms' 
 
 _Dialog showing a WebAuthn credential displayed on an autofill prompt_
 
-We still want to support traditional security keys with this flow. For this example, clicking "Sign in with another device..." would open the regular WebAuthn dialog. Requests to plugged in security keys would be dispatched like normal even if the user doesn't click the button. Security keys requiring UI interaction (e.g. PIN entry) would trigger the same UI flow as a normal WebAuthn request.
+We still want to support traditional security keys with this flow. For this example, clicking "Sign in with another device..." would open the regular WebAuthn dialog. Requests to plugged in security keys won't be dispatched until the user clicks the button, as dispatching to security keys without UI provides a vector to use the API in unintended ways.
+
 Credential registration is out of scope for this feature and will happen through the existing WebAuthn flow.
 
 ## API Layer
