@@ -1,4 +1,4 @@
-# WebAuthn API JSON Serialization Methods Explainer
+# WebAuthn JSON Serialization Methods Explainer
 
 **Author:** Martin Kreichgauer \<martinkr@google.com\>
 
