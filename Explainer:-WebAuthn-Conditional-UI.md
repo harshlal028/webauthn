@@ -61,7 +61,7 @@ An HTML autofill "webauthn" token is added to instruct the user-agent to fill we
 
 These tokens can be combined with existing autofill tokens, like so:
 * "username webauthn": same as "webauthn", and also offer autofilling a user's name
-* "current-password webauthn": same as "webauthn", and also autofill a user's surname
+* "current-password webauthn": same as "webauthn", and also autofill a user's password
 
 etc.
 
