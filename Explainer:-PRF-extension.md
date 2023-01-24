@@ -26,3 +26,8 @@ The API also supports more complex uses by allowing each assertion to query the 
 
 In order that exposing the outputs of the `hmac-secret` extension to the web not invalidate the security assumptions of any non-web users, the PRF evaluation points are hashed with a fixed prefix before use to partition the PRF space. (Assuming that an attacker cannot calculate preimages for SHA-256.)
 
+### Privacy
+
+Nothing in this extension changes the general privacy properties of WebAuthn. Thus the PRFs are always per-credential and cannot be used to correlate anything between different credentials. Evaluating the PRFs is done in the context of an assertion and so a human will see the usual WebAuthn UI and will need to tap a security key (or approve in UI for platform authenticators) before any information is released.
+
+Access control is enforced based on [RP ID](https://www.w3.org/TR/webauthn-2/#rp-id) and so origins that are authorised to get an assertion from a credential are also authorised to evaluate any PRFs.
