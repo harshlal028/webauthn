@@ -14,9 +14,9 @@ TAG review requires filling a [Security and Privacy questionnaire](https://w3cta
 
    For WebAuthn in general, see [security](https://w3c.github.io/webauthn/#sctn-security-considerations) and [privacy](https://w3c.github.io/webauthn/#sctn-privacy-considerations). While it is possible to store PII on a large blob, this is no different to associating PII to a given credential server-side.
 
-   Each authenticator type might choose to protect this information from offline attackers in posession of a user's device in different ways. CTAP 2.1 does so by:
+   Each authenticator type might choose to protect this information from offline attackers in posession of a user's device in different ways. CTAP 2.1 (at the time, the only protocol with support for this feature) does so by:
      * [Protecting reading of the large blob array](https://fidoalliance.org/specs/fido-v2.1-rd-20201208/fido-client-to-authenticator-protocol-v2.1-rd-20201208.html#largeBlobsRW) (the underlying storage) with user verification (i.e. requiring a PIN / fingerprint / etc) when configured.
-     * Encrypting each blob with a per-credential key that is only disclosed during registration & assertion. Assertions can be mandated to require user verification through the mandatory "credProtect" extension.
+     * Encrypting each blob with a per-credential key that is only disclosed during registration & assertion. Assertions can be mandated to require user verification through the [credProtect](https://fidoalliance.org/specs/fido-v2.1-rd-20201208/fido-client-to-authenticator-protocol-v2.1-rd-20201208.html#sctn-credProtect-extension) extension.
 
 4. How do the features in your specification deal with sensitive information?
 
@@ -24,13 +24,13 @@ TAG review requires filling a [Security and Privacy questionnaire](https://w3cta
 
 5. Do the features in your specification introduce new state for an origin that persists across browsing sessions?
 
-   Yes. The large blob persists across browsing sessions.
+   Yes. The large blob persists across browsing sessions. This is no different to how the existing discoverable credentials work.
 
 6. Do the features in your specification expose information about the underlying platform to origins?
 
    Somewhat. After creating or asserting a credential, the browser will indicate support of the feature. Support depends on the browser, platform (on Windows, large blob is only supported for versions >= 11), and authenticator. For example, a relying party that knows a user is on Windows can infer that they are on a fairly recent version if large blob registration succeeds.
 
-   This information is not very practical to use for fingerprinting the user since it requires them to go through a registration or assertion ceremony.
+   This information is not very practical to use for fingerprinting the user since it requires the user to go through a registration or assertion ceremony.
 
 7. Does this specification allow an origin to send data to the underlying platform?
 
@@ -42,7 +42,7 @@ TAG review requires filling a [Security and Privacy questionnaire](https://w3cta
 
 9. What data do the features in this specification expose to an origin? Please also document what data is identical to data exposed by other features, in the same or different contexts.
 
-   See #1. Large blobs that were previously stored, and whether they are supported by the given authenticator & platform. This data is new.
+   See #1. Large blobs that were previously stored by the same origin, and whether they are supported by the given authenticator & platform. This data is new.
 
 10. Do features in this specification enable new script execution/loading mechanisms?
 
@@ -62,11 +62,13 @@ TAG review requires filling a [Security and Privacy questionnaire](https://w3cta
 
 14. How does this specification distinguish between behavior in first-party and third-party contexts?
 
-    Large blobs does not change how WebAuthn treats first-party vs third-party contexts. For specific guidance on webauthn & iframes, see [Using Web Authentication within iframe elements](https://w3c.github.io/webauthn/#sctn-iframe-guidance). For a general discussion on credential management, see [Cross domain credential access](https://w3c.github.io/webappsec-credential-management/#security-credential-access) and [Origin confusion](https://w3c.github.io/webappsec-credential-management/#security-origin-confusion).
+    Large blobs does not change how WebAuthn treats first-party vs third-party contexts. For specific guidance on webauthn & iframes, see [Using Web Authentication within iframe elements](https://w3c.github.io/webauthn/#sctn-iframe-guidance).
 
 15. How do the features in this specification work in the context of a browser’s Private Browsing or Incognito mode?
 
-    Storing a large blob will leave information that outlasts the incognito session. Chrome already has a warning for incognito mode when storing a discoverable credential (practically speaking, a requirement for large blobs) and tells the user of this fact. Other than that, the feature works the same.
+    Similar to how [discoverable credentials](https://w3c.github.io/webauthn/#discoverable-credential) already work, it is not possible for a relying party to know if the authenticator does not support the feature, or the user agent (or user) denied consent. It should not be possible then to infer the user is in a private session from this extension.
+    
+    Storing a large blob will leave information that outlasts the incognito session. This matches the existing behaviour for discoverable credentials. Chrome already has a warning for incognito mode when storing a discoverable credential (which is effectively a requirement for large blobs) and tells the user of this fact.
 
 16. Does this specification have both "Security Considerations" and "Privacy Considerations" sections?
 
