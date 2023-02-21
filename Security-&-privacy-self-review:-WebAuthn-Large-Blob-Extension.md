@@ -12,11 +12,7 @@ TAG review requires filling a [Security and Privacy questionnaire](https://w3cta
 
 3. How do the features in your specification deal with personal information, personally-identifiable information (PII), or information derived from them?
 
-   For WebAuthn in general, see [security](https://w3c.github.io/webauthn/#sctn-security-considerations) and [privacy](https://w3c.github.io/webauthn/#sctn-privacy-considerations). While it is possible to store PII on a large blob, this is no different to associating PII to a given credential server-side.
-
-   Each authenticator type might choose to protect this information from offline attackers in posession of a user's device in different ways. CTAP 2.1 (at the time, the only protocol with support for this feature) does so by:
-     * [Protecting reading of the large blob array](https://fidoalliance.org/specs/fido-v2.1-rd-20201208/fido-client-to-authenticator-protocol-v2.1-rd-20201208.html#largeBlobsRW) (the underlying storage) with user verification (i.e. requiring a PIN / fingerprint / etc) when configured.
-     * Encrypting each blob with a per-credential key that is only disclosed during registration & assertion. Assertions can be mandated to require user verification through the [credProtect](https://fidoalliance.org/specs/fido-v2.1-rd-20201208/fido-client-to-authenticator-protocol-v2.1-rd-20201208.html#sctn-credProtect-extension) extension.
+   By design, this feature lets sites store and retrieve arbitrary data. It's up to the site to define what data this is. The data is protected the same way as regular discoverable credentials, which by nature of being for authentication can usually be considered PII. See the [webauthn privacy considerations](https://w3c.github.io/webauthn/#sctn-privacy-considerations).
 
 4. How do the features in your specification deal with sensitive information?
 
@@ -24,7 +20,7 @@ TAG review requires filling a [Security and Privacy questionnaire](https://w3cta
 
 5. Do the features in your specification introduce new state for an origin that persists across browsing sessions?
 
-   Yes. The large blob persists across browsing sessions. This is no different to how the existing discoverable credentials work.
+   WebAuthn discoverable credentials already persist between browsing sessions. Large blob lets websites add arbitrary data to these credentials.
 
 6. Do the features in your specification expose information about the underlying platform to origins?
 
