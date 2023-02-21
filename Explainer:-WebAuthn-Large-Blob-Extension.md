@@ -21,11 +21,11 @@ const credential = await navigator.credentials.create({
     user: ...,
     rp: ...,
     authenticatorSelection: {
-      residentKey: "preferred",  // or "required"
+      residentKey: "preferred",  // Or "required".
     },
     extensions: {
       largeBlob: {
-        support: "preferred",  // or "required"
+        support: "preferred",  // Or "required".
       },
     },
   }
@@ -58,7 +58,7 @@ const assertion = await navigator.credentials.get({
     challenge: ...,
     allowCredentials: [{
       type: "public-key",
-      id: credentialId,  // only a single credential is supported.
+      id: credentialId,  // Only a single credential is supported.
     }],
     extensions: {
       largeBlob: {
@@ -86,7 +86,7 @@ const assertion = await navigator.credentials.get({
     challenge: ...,
     allowCredentials: [{
       type: "public-key",
-      id: credentialId,  // an arbitrary number of credentials is supported
+      id: credentialId,  // An arbitrary number of credentials is supported.
     }],
     extensions: {
       largeBlob: {
@@ -106,3 +106,12 @@ if (typeof assertion.getClientExtensionResults().largeBlob.read !== "undefined")
 ```
 
 When reading a large blob, any number of entries is allowed in `allowCredentials` (including none, for a discoverable credential request).
+
+## Privacy considerations
+
+There are no particular privacy concerns associated with the large blob extension. Reading and writing large blobs only happens when the user consents to sharing a credential that was previously minted for a given relying party.
+
+## Useful links
+
+* The WebAuthn Large Blob Extension spec https://w3c.github.io/webauthn/#sctn-large-blob-extension
+* Large blobs in CTAP 2.1 https://fidoalliance.org/specs/fido-v2.1-rd-20201208/fido-client-to-authenticator-protocol-v2.1-rd-20201208.html#authenticatorLargeBlobs
