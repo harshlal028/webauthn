@@ -111,7 +111,7 @@ When reading a large blob, any number of entries is allowed in `allowCredentials
 
 ## Privacy considerations
 
-Privacy considerations are the same as for discoverable credentials that don't have large blobs attached to them. Reading and writing large blobs only happens when the user consents to sharing a credential that was previously minted for a given relying party.
+Privacy considerations are the same as for [discoverable credentials](https://w3c.github.io/webauthn/#discoverable-credential) that don't have large blobs attached to them. Reading and writing large blobs only happens when the user consents to sharing a credential that was previously minted for a given relying party.
 
 ## Useful links
 * Demo https://webauthn-large-blob.glitch.me/index.html
