@@ -6,7 +6,9 @@ A pair of registration/assertion extensions for WebAuthn that let relying partie
 
 ### Background
 
-Relying parties are websites, and therefore have access to servers that can store arbitrary amounts of data about a user. However, there are specific cases where a relying party might want to store some data associated to a user's account that can be used in an offline authentication context, such as a certificate. The large blob extension allows relying parties to store and retrieve such data during an [assertion ceremony](https://w3c.github.io/webauthn/#sctn-getAssertion).
+Relying parties are websites, and therefore have access to servers that can store arbitrary amounts of data about a user. However, there are specific cases where a relying party might want to store some data associated to a user's account that can be used in an offline authentication context. An example is to fetch an x.509 certificate along with a WebAuthn assertion. The certificate can be used to authenticate the user to some upstream server system, e.g. via certificate-based SSH authentication.
+
+The large blob extension allows relying parties to store and retrieve such data during an [assertion ceremony](https://w3c.github.io/webauthn/#sctn-getAssertion).
 
 ### API
 
@@ -109,7 +111,7 @@ When reading a large blob, any number of entries is allowed in `allowCredentials
 
 ## Privacy considerations
 
-There are no particular privacy concerns associated with the large blob extension. Reading and writing large blobs only happens when the user consents to sharing a credential that was previously minted for a given relying party.
+Privacy considerations are the same as for discoverable credentials that don't have large blobs attached to them. Reading and writing large blobs only happens when the user consents to sharing a credential that was previously minted for a given relying party.
 
 ## Useful links
 * Demo https://webauthn-large-blob.glitch.me/index.html
