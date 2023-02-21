@@ -45,7 +45,7 @@ if (credential.getClientExtensionResults().largeBlob.supported) {
 
 If support is set to `required`, the user agent will only create a credential for authenticators with large blob support, and can inform the user of that need. Otherwise, the credential will be created regardless of support, and support will be advertised by the `largeBlob.support` registration extension output.
 
-Note that discoverable credential ("resident key") support is required to store a large blob on CTAP 2.1 authenticators, so it is recommended to set to "preferred" or "required". This restriction may not apply to other (e.g. platform) authenticators.
+Note that discoverable credential ("resident key") support is required to store a large blob on CTAP 2.1 authenticators, so it is recommended to set `residentKey` to `preferred` or `required`. This restriction may not apply to other (e.g. platform) authenticators.
 
 #### Assertion
 
