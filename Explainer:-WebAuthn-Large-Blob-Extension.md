@@ -112,6 +112,6 @@ When reading a large blob, any number of entries is allowed in `allowCredentials
 There are no particular privacy concerns associated with the large blob extension. Reading and writing large blobs only happens when the user consents to sharing a credential that was previously minted for a given relying party.
 
 ## Useful links
-
+* Demo https://webauthn-large-blob.glitch.me/index.html
 * The WebAuthn Large Blob Extension spec https://w3c.github.io/webauthn/#sctn-large-blob-extension
 * Large blobs in CTAP 2.1 https://fidoalliance.org/specs/fido-v2.1-rd-20201208/fido-client-to-authenticator-protocol-v2.1-rd-20201208.html#authenticatorLargeBlobs
