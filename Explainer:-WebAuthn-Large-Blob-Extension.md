@@ -6,9 +6,13 @@ A pair of registration/assertion extensions for WebAuthn that let relying partie
 
 ### Background
 
-Relying parties are websites, and therefore have access to servers that can store arbitrary amounts of data about a user. However, there are specific cases where a relying party might want to store some data associated to a user's account that can be used in an offline authentication context. An example is to fetch an x.509 certificate along with a WebAuthn assertion. The certificate can be used to authenticate the user to some upstream server system, e.g. via certificate-based SSH authentication.
+Relying parties are websites, and therefore have access to servers that can store arbitrary amounts of data about a user. However, there are specific cases where a relying party might want to store some data associated to a user's account that can be used in an offline authentication context. The large blob extension allows relying parties to store and retrieve such data during an [assertion ceremony](https://w3c.github.io/webauthn/#sctn-getAssertion).
 
-The large blob extension allows relying parties to store and retrieve such data during an [assertion ceremony](https://w3c.github.io/webauthn/#sctn-getAssertion).
+#### Example use cases
+
+* A corporate SSO uses security keys to authenticate their users. The company would like to use the same security keys for SSH access, even if their SSO service is offline (e.g. to allow responding to an outage of said service). The SSO can install new short-lived SSH certificates on each sign-in using the large blob extension on the security key.
+
+* A web messaging app needs to store a secret to implement end-to-end encryption. By using large blob, the relying party could store the secret on an authenticator. Then, the user could carry their secret securely with them and reveal it to the app on different platforms.
 
 ### API
 
