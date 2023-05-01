@@ -42,7 +42,8 @@ navigator.credentials.get({
         extensions: {prf: {eval: {first: new TextEncoder().encode("Foo encryption key")}}},
     },
 }).then((c) => {
-  console.log(btoa(String.fromCharCode.apply(null, new Uint8Array(c.getClientExtensionResults().prf.results.first))));
+  console.log(btoa(String.fromCharCode.apply(null, new Uint8Array(
+                c.getClientExtensionResults().prf.results.first))));
 });
 ```
 
