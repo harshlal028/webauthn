@@ -64,7 +64,7 @@ navigator.credentials.create({
         timeout: 60000,
         authenticatorSelection: {
             authenticatorAttachment: "cross-platform",
-            residentKey: "required,
+            residentKey: "required",
         },
         extensions: {prf: {}},
 
