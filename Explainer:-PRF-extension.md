@@ -26,6 +26,28 @@ The API also supports more complex uses by allowing each assertion to query the 
 
 In order that exposing the outputs of the `hmac-secret` extension to the web not invalidate the security assumptions of any non-web users, the PRF evaluation points are hashed with a fixed prefix before use to partition the PRF space. (Assuming that an attacker cannot calculate preimages for SHA-256.)
 
+### Example
+
+The following example reflects the basic usage of the PRF extension where a fixed key is requested per credential. It requests a PRF evaluation from a discoverable credential bound to the current origin and logs it to the console, base64 encoded. It requires a security key that supports the `hmac-secret` feature in CTAP2.
+
+```js
+navigator.credentials.get({
+    publicKey: {
+        timeout: 60000,
+        challenge: new Uint8Array([ 
+            // must be a cryptographically random number sent from a server. Don't use dummy
+            // values in real authentication situations.
+            1,2,3,4,
+        ]).buffer,
+        extensions: {prf: {eval: {first: new TextEncoder().encode("Foo encryption key")}}},
+    },
+}).then((c) => {
+  console.log(btoa(String.fromCharCode.apply(null, new Uint8Array(c.getClientExtensionResults().prf.results.first))));
+});
+```
+
+Rather than logging to the console, a real use might decrypt some saved state with the resulting key. For example, by using [AES-GCM with WebCrypto](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/decrypt). Since the key will be constant for a given credential, it's vitally important to ensure the the nonce used when encrypting is unique. Since users may have multiple credentials, a two-level encryption structure may be needed to allow decryption with any of their security keys. But the design of such structures is out of scope here.
+
 ### Privacy
 
 Nothing in this extension changes the general privacy properties of WebAuthn. Thus the PRFs are always per-credential and cannot be used to correlate anything between different credentials. Evaluating the PRFs is done in the context of an assertion and so a human will see the usual WebAuthn UI and will need to tap a security key (or approve in UI for platform authenticators) before any information is released.
