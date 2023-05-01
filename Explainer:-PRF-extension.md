@@ -28,7 +28,7 @@ In order that exposing the outputs of the `hmac-secret` extension to the web not
 
 ### Example
 
-The following example reflects the basic usage of the PRF extension where a fixed key is requested per credential. It requests a PRF evaluation from a discoverable credential bound to the current origin and logs it to the console, base64 encoded. It requires a security key that supports the `hmac-secret` feature in CTAP2.
+The following example reflects the basic usage of the PRF extension where a fixed key is requested per credential. It requests a PRF evaluation from a discoverable credential bound to the current origin and logs it to the console, base64 encoded. It requires a security key that supports the `hmac-secret` feature in CTAP2. (See sample below to create a credential first if the origin doesn't already have one.)
 
 ```js
 navigator.credentials.get({
@@ -48,6 +48,40 @@ navigator.credentials.get({
 ```
 
 Rather than logging to the console, a real use might decrypt some saved state with the resulting key. For example, by using [AES-GCM with WebCrypto](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/decrypt). Since the key will be constant for a given credential, it's vitally important to ensure the the nonce used when encrypting is unique. Since users may have multiple credentials, a two-level encryption structure may be needed to allow decryption with any of their security keys. But the design of such structures is out of scope here.
+
+If you need to set up a credential to try that example, the following snippet will do that:
+
+```js
+navigator.credentials.create({
+    publicKey: {
+        rp: {
+            name: "Acme"
+        },
+
+        // User:
+        user: {
+            id: new Uint8Array(16),
+            name: "john.p.smith@example.com",
+            displayName: "John P. Smith"
+        },
+
+        pubKeyCredParams: [{
+            type: "public-key",
+            alg: -7
+        }],
+
+        timeout: 60000,
+        authenticatorSelection: {
+            authenticatorAttachment: "cross-platform",
+            residentKey: "required,
+        },
+        extensions: {prf: {}},
+
+        // unused without attestation so a dummy value is fine.
+        challenge: new Uint8Array([0]).buffer,
+    }
+}).then((c) => {console.log(c.getClientExtensionResults());});
+```
 
 ### Privacy
 
