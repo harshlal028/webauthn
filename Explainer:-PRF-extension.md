@@ -54,22 +54,13 @@ If you need to set up a credential to try that example, the following snippet wi
 ```js
 navigator.credentials.create({
     publicKey: {
-        rp: {
-            name: "Acme"
-        },
-
-        // User:
+        rp: {name: "Acme"},
         user: {
             id: new Uint8Array(16),
             name: "john.p.smith@example.com",
             displayName: "John P. Smith"
         },
-
-        pubKeyCredParams: [{
-            type: "public-key",
-            alg: -7
-        }],
-
+        pubKeyCredParams: [{type: "public-key", alg: -7}],
         timeout: 60000,
         authenticatorSelection: {
             authenticatorAttachment: "cross-platform",
