@@ -78,4 +78,8 @@ navigator.credentials.create({
 
 Nothing in this extension changes the general privacy properties of WebAuthn. Thus the PRFs are always per-credential and cannot be used to correlate anything between different credentials. Evaluating the PRFs is done in the context of an assertion and so a human will see the usual WebAuthn UI and will need to tap a security key (or approve in UI for platform authenticators) before any information is released.
 
-Access control is enforced based on [RP ID](https://www.w3.org/TR/webauthn-2/#rp-id) and so origins that are authorised to get an assertion from a credential are also authorised to evaluate any PRFs.
+Access control is enforced based on [RP ID](https://www.w3.org/TR/webauthn-2/#rp-id) and so origins that are authorised to get an assertion from a credential are also authorised to evaluate any PRFs. WebAuthn works in cross-site iframes if the parent frame explicitly [permits it](https://w3c.github.io/webauthn/#sctn-permissions-policy) with Permissions Policy, thus this extension can work in that context too. The cross-origin iframe would still be limited by the [RP ID mechanism](https://w3c.github.io/webauthn/#rp-id) so that it could only attempt to assert credentials created within the same eTLD+1, however.
+
+A PRF value could be used as a tracking vector, but that would be a bit obtuse because WebAuthn credentials themselves already have a large random ID. 
+
+Fundamentally, as an authentication mechanism WebAuthn must be a method of identification. The balance is that WebAuthn requires a ceremony: browser UI plus authenticator activation (e.g. touching a security key). The PRF extension is part of a WebAuthn authentication and thus requires the same ceremony, it can never be triggered silently or the like.
