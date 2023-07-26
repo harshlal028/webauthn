@@ -34,6 +34,7 @@ To inform the user agent that it's desired for a credential to be created whenev
 
 ```javascript
 const assertionOrRegistration = await navigator.credentials.get({
+  mediation: 'conditional'
   publicKey: {
     challenge: ...,
     extensions: {
