@@ -65,3 +65,65 @@ User agents must make users aware whenever a credential is created.
 
 ## Useful links
 * Explainer: WebAuthn Conditional UI https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI
+
+
+
+
+# Potential alternative (Separate create call)
+
+### Example use case
+
+A consumer RP uses username and password login for most of their users. The relying party would like to upgrade their users to passkeys.
+
+* A user visits the login page of the RP's website. They see a standard username and password form.
+
+* The login form starts a conditional mediation request with extension `conditionalCreate: true`.
+
+* Their user agent offers to AutoFill their saved username and password. The user accepts the suggestion.
+
+* The RP checks the user's credentials and collects any nessesary information to register a credential.
+
+* The RP makes a call to navigator.credentials.create with mediation = conditional.
+
+* Because the user agent knows that it just mediated a authentication ceremony for the website and the user consents to credential creation, a passkey is created and the promised returned by `credentials.navigator.create` is fulfilled.
+
+* The user now has both a password and a passkey saved for their account. The next time they visit the same log in page, they will be offered the passkey by AutoFill.
+
+From the user's point of view, the experience is the same; they accept the first AutoFill suggestion to get logged in to their account.
+
+## API
+
+### Assertion
+
+To inform the user agent that it's desired for a credential to be created whenever an authentication ceremony was mediated via non-WebAuthn means.
+
+```javascript
+const registration = await navigator.credentials.get({
+  mediation: 'conditional'
+  publicKey: {
+    ...
+    extensions: {
+      conditionalCreate: true,
+    },
+  },
+});
+```
+
+This call at assertion time allows the user agent to collect consent for credential creation at the time the authentication ceremony is mediated.
+
+### Creation
+
+To inform the user agent that it's desired for a credential to be created whenever an authentication ceremony was mediated via non-WebAuthn means.
+
+```javascript
+const registration = await navigator.credentials.create({
+  mediation: 'conditional'
+  publicKey: {
+    challenge: ...,
+    user: ...,
+    rp: ...,
+  },
+});
+```
+
+The origin of the document where the authentication ceremony was mediated and the origin where `navigator.credentials.create` must be the same. 
