@@ -2,7 +2,7 @@
 
 **Author:** Pascoe <[pascoe@apple.com](mailto:pascoe@apple.com)>
 
-**Last update:** July 25, 2023
+**Last update:** August 9, 2023
 
 ## Summary
 
@@ -38,7 +38,7 @@ const assertionOrRegistration = await navigator.credentials.get({
   publicKey: {
     challenge: ...,
     extensions: {
-      conditionalRegistration: {
+      conditionalRegistration: () => {
         challenge: ...,
         user: ...,
         rp: ...,
