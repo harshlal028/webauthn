@@ -27,7 +27,7 @@ Thus we propose a [well-known URL](https://www.rfc-editor.org/rfc/rfc5785.html) 
     "origins": [
         "https://example.co.uk",
         "https://example.de",
-        "https://example-rewards.com",
+        "https://example-rewards.com"
     ]
 }
 ```
