@@ -63,6 +63,8 @@ Solutions for sharing _passwords_ between websites vary between password manager
 
 [Secure Payment Confirmation](https://www.w3.org/TR/secure-payment-confirmation/) allows WebAuthn credentials to be used from any origin, with a payment-focused UI, provided that SPC was explicitly enabled for the credential at creation time.
 
+WebAuthn also has support for making assertions [within iframes](https://www.w3.org/TR/webauthn-2/#sctn-iframe-guidance), which can operate across domains.
+
 ## Communication with the user
 While the details of user-agent UI are out of scope for the WebAuthn specification, they are still  important.
 
