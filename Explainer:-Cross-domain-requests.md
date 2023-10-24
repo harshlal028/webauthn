@@ -20,7 +20,7 @@ WebAuthn is mirrored into mobile APIs so that credentials can work across platfo
 ## Proposal
 The best current option for sites with these issues is to use redirects and iframes to centralise the use of WebAuthn on a single domain. But the feedback is clear that this is a major impediment to adoption and also that these solutions may (or do) run afoul of privacy controls that browsers are implementing. Thus we seek to build a more explicit solution.
 
-Thus we propose a [well-known URL](https://www.rfc-editor.org/rfc/rfc5785.html) where an origin can list other origins that are authorized to use it as an RP ID. The URL is `https://{RP ID}/.well-known/passkey-origins`. It must be served with [content type](https://datatracker.ietf.org/doc/html/rfc9110#name-content-type) of `application/json` and contain a single [JSON](https://datatracker.ietf.org/doc/html/rfc8259) object. For example:
+Thus we propose a [well-known URL](https://www.rfc-editor.org/rfc/rfc5785.html) where an origin can list other origins that are authorized to use it as an RP ID. The URL is `https://{RP ID}/.well-known/webauthn-origins`. It must be served with [content type](https://datatracker.ietf.org/doc/html/rfc9110#name-content-type) of `application/json` and contain a single [JSON](https://datatracker.ietf.org/doc/html/rfc8259) object. For example:
 
 ```json
 {
