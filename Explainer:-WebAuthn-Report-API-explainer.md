@@ -1,4 +1,4 @@
-# WebAuthn Report API explainer
+# Explainer: WebAuthn Report API explainer
 
 ## Authors
 
