@@ -10,7 +10,7 @@ Allow WebAuthn relying parties to report information about existing credentials 
 
 ## Background and motivation
 
-Discoverable credentials, such as passkeys, can be requested with `navigator.credentials.get` with an empty `allowList`. In this case, if a user has any credentials for that relying party, they are presented with some UI to select which credential to use. If the user selects a credential, the resulting assertion carries the `user.id` value set at registration, allowing the relying party to resolve to an account without any further information.
+Discoverable credentials, such as passkeys, can be requested with `navigator.credentials.get` with an empty `allowCredentials`. In this case, if a user has any credentials for that relying party, they are presented with some UI to select which credential to use. If the user selects a credential, the resulting assertion carries the `user.id` value set at registration, allowing the relying party to resolve to an account without any further information.
 
 This allows flows where the user is not required to enter a username, they simply select a credential. When used with conditional mediation, this further allows a smoother transition from traditional username entry, by allowing users that have passkeys to "fill" the username field using the passkey, and usually thereby omitting any further entry such as passwords or 2nd-factor authentication.
 
