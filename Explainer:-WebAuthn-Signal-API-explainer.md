@@ -88,7 +88,7 @@ Note that it's at the provider’s discretion how to handle conflicts between ma
 A simple way for a relying party to report updates without tracking any additional state is to send a `currentCredentials` report after every successful sign-in (note that this can be done even if WebAuthn wasn't used to sign in).
 
 ```javascript
-PublicKeyCredential.signal({
+await PublicKeyCredential.signal({
   currentCredentials: {
     rpId: "example.com",
     userId: "M2YPl-KGnA8", // same as user.id at creation time
@@ -108,7 +108,7 @@ PublicKeyCredential.signal({
 If a relying party receives an assertion with a credential that it does not recognize, it can report this back to the client. Note that it is safe to do this even if no user is signed in, as long as the credential id was already observed from this client.
 
 ```javascript
-PublicKeyCredential.signal({
+await PublicKeyCredential.signal({
   unknownCredential: {
     rpId: "example.com",
     credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA"
@@ -121,7 +121,7 @@ If the user revokes or deletes a credential, e.g. in an account settings UI on t
 Similarly, if a user changes their user- or display names while signed in, e.g. in an account settings UI, this can be reported to the current user agent without listing accepted credential ids:
 
 ```javascript
-PublicKeyCredential.signal({
+await PublicKeyCredential.signal({
   currentCredentials: {
     rpId: "example.com",
     userId: "M2YPl-KGnA8", // same as user.id at creation time
