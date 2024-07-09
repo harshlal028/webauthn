@@ -1,4 +1,6 @@
-# Explainer: WebAuthn Report API explainer
+# Explainer: WebAuthn Signal API explainer
+
+_(note: renamed from "Report API" to avoid confusion with the [Reporting API](https://developer.mozilla.org/en-US/docs/Web/API/Reporting_API))_
 
 ## Authors
 
@@ -25,21 +27,24 @@ The first case in particular is not only tied to explicit revocation or account 
 
 ## Solution
 
-A new API, `navigator.credentials.report`, allows relying parties to report such state updates back to user agents, who can forward these to the underlying credential providers. The API is opportunistic as there is no guarantee that the correct credential provider is reachable on the current client.
+A new API, `PublicKeyCredential.signal`, allows relying parties to report such state updates back to user agents, who can forward these to the underlying credential providers. The API is opportunistic as there is no guarantee that the correct credential provider is reachable on the current client.
 
-The API takes a relying party ID, and a number of _report types_. RPs may combine multiple reports in a single call. The set of report types is meant to be extendable in the future.
+The API takes a number of _report types_. RPs may combine multiple reports in a single call. The set of report types is meant to be extendable in the future.
 
 A report type is a key in a JSON structure, where the value of that entry sets additional parameters specific to the report type.
 
 Each report type lists example scenarios in which it makes sense to send it, and possible credential provider actions. Note that any credential provider action is optional and at the discretion of each provider implementation.
 
-### `unknownCredentialId`
+### `unknownCredential`
 
 This report names a credential ID and indicates that the relying party would reject an assertion with that credential because the credential ID is unknown to the RP.
 
 ```javascript
 {
-  unknownCredentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA" // b64-url cred ID
+  unknownCredential: {
+    rpId: "example.com",
+    credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA" // b64-url cred ID
+  }
 }
 ```
 
@@ -56,9 +61,10 @@ This report names a `user.id` value and all accepted credential IDs, and/or upda
 ```javascript
 {
   currentCredentials: {
-    userId: "M2YPl-KGnA8",
+    rpId: "example.com",
+    userId: "M2YPl-KGnA8",  // b64-url
     allAcceptedCredentialIds: [
-      "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA",
+      "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA",  // b64-url
       ...
     ],
     user: {  // See https://www.w3.org/TR/webauthn-3/#dictdef-publickeycredentialuserentityjson (minus user.id)
@@ -73,7 +79,7 @@ _Usage scenario:_ Immediately after an accepted `.get()` response, or at any tim
 
 This report should only be made if the user has been fully authenticated.
 
-It is not possible to update the `user.id` value. Either `allAcceptedCredentalIds` or `user` can be omitted, but not both.
+It is not possible to update the `user.id` value. Either `allAcceptedCredentalIds` or `user` can be omitted. Omitting both has no effect.
 
 _Example provider action:_ If `allAcceptedCredentialIds` is present, mark any non-appearing credential for the same RP ID and `user.id` value for omission in future account selectors. If the user value is present, update the credential store to use the supplied values in future UI representing this credential.
 
@@ -84,9 +90,9 @@ Note that it's at the provider’s discretion how to handle conflicts between ma
 A simple way for a relying party to report updates without tracking any additional state is to send a `currentCredentials` report after every successful sign-in (note that this can be done even if WebAuthn wasn't used to sign in).
 
 ```javascript
-navigator.credentials.report({publicKey: {
-  rpId: "example.com",
+PublicKeyCredential.signal({
   currentCredentials: {
+    rpId: "example.com",
     userId: "M2YPl-KGnA8", // same as user.id at creation time
     user: {
       name: "currentemail@relying-party.com",
@@ -104,20 +110,22 @@ navigator.credentials.report({publicKey: {
 If a relying party receives an assertion with a credential that it does not recognize, it can report this back to the client. Note that it is safe to do this even if no user is signed in, as long as the credential id was already observed from this client.
 
 ```javascript
-navigator.credentials.report({publicKey: {
-  rpId: "example.com",
-  unknownCredentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA"
-}});
+PublicKeyCredential.signal({
+  unknownCredential: {
+    rpId: "example.com",
+    credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA"
+  }
+});
 ```
 
-If the user revokes or deletes a credential, e.g. in an account settings UI on the relying party's website, the relying party can opportunistically report this at that time with the `unknownCredentialId` type. However this will only have effect if the user agent is able to route the report to the same credential provider that created this credential. It may be better to send a `currentCredentials` report instead, with a complete list of valid credential IDs. In this case the `user` attributes can be omitted to signal they should not be updated.
+If the user revokes or deletes a credential, e.g. in an account settings UI on the relying party's website, the relying party can opportunistically report this at that time with the `unknownCredential` type. However this will only have effect if the user agent is able to route the report to the same credential provider that created this credential. It may be better to send a `currentCredentials` report instead, with a complete list of valid credential IDs. In this case the `user` attributes can be omitted to signal they should not be updated.
 
 Similarly, if a user changes their user- or display names while signed in, e.g. in an account settings UI, this can be reported to the current user agent without listing accepted credential ids:
 
 ```javascript
-navigator.credentials.report({publicKey: {
-  rpId: "example.com",
+PublicKeyCredential.signal({
   currentCredentials: {
+    rpId: "example.com",
     userId: "M2YPl-KGnA8", // same as user.id at creation time
     user: {
       name: "currentemail@relying-party.com",
