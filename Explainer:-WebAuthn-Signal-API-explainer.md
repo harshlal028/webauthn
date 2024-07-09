@@ -29,11 +29,9 @@ The first case in particular is not only tied to explicit revocation or account 
 
 A new API, `PublicKeyCredential.signal`, allows relying parties to report such state updates back to user agents, who can forward these to the underlying credential providers. The API is opportunistic as there is no guarantee that the correct credential provider is reachable on the current client.
 
-The API takes a number of _report types_. RPs may combine multiple reports in a single call. The set of report types is meant to be extendable in the future.
+The API takes a number of _report types_. RPs may combine multiple reports in a single call. The set of report types is meant to be extendable in the future. A report type is a key in a JSON structure, where the value of that entry sets additional parameters specific to the report type. Each report type lists example scenarios in which it makes sense to send it, and possible credential provider actions. Note that any credential provider action is optional and at the discretion of each provider implementation.
 
-A report type is a key in a JSON structure, where the value of that entry sets additional parameters specific to the report type.
-
-Each report type lists example scenarios in which it makes sense to send it, and possible credential provider actions. Note that any credential provider action is optional and at the discretion of each provider implementation.
+`PublicKeyCredential.signal` returns a promise that will reject if there are any errors parsing a report (e.g. an invalid base64url string, or claiming an invalid RPID). However, the result will not include any information about how a report was processed. This is to allow for implementations that do not collect consent from the user before e.g. updating a credential's name without leaking leaking information to the RP about the state of the credentials.
 
 ### `unknownCredential`
 
