@@ -27,23 +27,19 @@ The first case in particular is not only tied to explicit revocation or account 
 
 ## Solution
 
-A new API, `PublicKeyCredential.signal`, allows relying parties to report such state updates back to user agents, who can forward these to the underlying credential providers. The API is opportunistic as there is no guarantee that the correct credential provider is reachable on the current client.
+A new set of methods, `PublicKeyCredential.signal*`, allow relying parties to report such state updates back to user agents, who can forward these to the underlying credential providers. The API is opportunistic as there is no guarantee that the correct credential provider is reachable on the current client. Note that any credential provider action is optional and at the discretion of each provider implementation.
 
-The API takes a number of _report types_. RPs may combine multiple reports in a single call. The set of report types is meant to be extendable in the future. A report type is a key in a JSON structure, where the value of that entry sets additional parameters specific to the report type. Each report type lists example scenarios in which it makes sense to send it, and possible credential provider actions. Note that any credential provider action is optional and at the discretion of each provider implementation.
+`PublicKeyCredential.signal*` methods return a promise that will reject if there are any errors parsing a report (e.g. an invalid base64url string, or claiming an invalid RPID). However, the result will not include any information about how a report was processed. This is to allow for implementations that do not collect consent from the user before e.g. updating a credential's name without leaking leaking information to the RP about the state of the credentials.
 
-`PublicKeyCredential.signal` returns a promise that will reject if there are any errors parsing a report (e.g. an invalid base64url string, or claiming an invalid RPID). However, the result will not include any information about how a report was processed. This is to allow for implementations that do not collect consent from the user before e.g. updating a credential's name without leaking leaking information to the RP about the state of the credentials.
+### `PublicKeyCredential.signalUnknownCredentialId`
 
-### `unknownCredential`
-
-This report names a credential ID and indicates that the relying party would reject an assertion with that credential because the credential ID is unknown to the RP.
+This method names a credential ID and indicates that the relying party would reject an assertion with that credential because the credential ID is unknown to the RP.
 
 ```javascript
-{
-  unknownCredential: {
-    rpId: "example.com",
-    credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA" // b64-url cred ID
-  }
-}
+PublicKeyCredential.signalUnknownCredentialId({
+  rpId: "example.com",
+  credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA" // b64-url cred ID
+});
 ```
 
 _Usage scenario:_ Immediately following a response from `.get()` where the credential ID was not recognized. Appropriate to report even if the user was not authenticated.
@@ -52,85 +48,82 @@ _Example provider action:_ The credential may be marked for omission from future
 
 This situation may arise, for example, because the credential was revoked, or because the RP performed a create operation but failed to successfully store the public key on its backend.
 
-### `currentCredentials`
+### `PublicKeyCredential.signalAllAcceptedCredentialIds`
 
-This report names a `user.id` value and all accepted credential IDs, and/or updated values for `user.name` and/or `user.displayName` associated with that account.
+This report names a `user.id` value and all accepted credential IDs.
 
 ```javascript
-{
-  currentCredentials: {
-    rpId: "example.com",
-    userId: "M2YPl-KGnA8",  // b64-url
-    allAcceptedCredentialIds: [
-      "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA",  // b64-url
-      ...
-    ],
-    user: {  // See https://www.w3.org/TR/webauthn-3/#dictdef-publickeycredentialuserentityjson (minus user.id)
-      name: "a.new.email.address@example.com",
-      displayName: "J. Doe"
-    }
-  }
-}
+PublicKeyCredential.signalAllAcceptedCredentialIds({
+  rpId: "example.com",
+  userId: "M2YPl-KGnA8",  // b64-url
+  allAcceptedCredentialIds: [
+    "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA",  // b64-url
+    ...
+  ],
+});
 ```
 
-_Usage scenario:_ Immediately after an accepted `.get()` response, or at any time the user is authenticated and the set of accepted credentials, username or displayName have changed.
+_Usage scenario:_ Immediately after an accepted `.get()` response, or at any time the user is authenticated and the set of accepted credentials has changed.
 
 This report should only be made if the user has been fully authenticated.
 
-It is not possible to update the `user.id` value. Either `allAcceptedCredentalIds` or `user` can be omitted. Omitting both has no effect.
+_Example provider action:_ Mark any non-appearing credential for the same RP ID and `user.id` value for omission in future account selectors. Remove the mark from credentials that appear in the list.
 
-_Example provider action:_ If `allAcceptedCredentialIds` is present, mark any non-appearing credential for the same RP ID and `user.id` value for omission in future account selectors. If the user value is present, update the credential store to use the supplied values in future UI representing this credential.
+Note that it's at the provider’s discretion whether to hide or permanently delete credentials that aren't present in the list.
+
+### `PublicKeyCredential.signalCurrentUserDetails`
+
+This report names a `user.id` value, a `name` and `displayName`.
+
+```javascript
+PublicKeyCredential.signalCurrentUserDetails({
+  rpId: "example.com",
+  userId: "M2YPl-KGnA8",  // b64-url
+  name: "a.new.email.address@example.com",
+  displayName: "J. Doe"
+});
+```
+
+_Usage scenario:_ Immediately after an accepted `.get()` response, or at any time the user is authenticated and their `name` or `displayName` have changed.
+
+This report should only be made if the user has been fully authenticated.
+
+It is not possible to update the `user.id` value.
+
+_Example provider action:_ Update the credential store to use the supplied values in future UI representing this credential.
 
 Note that it's at the provider’s discretion how to handle conflicts between manually edited usernames/displayNames and the RP-provided reports.
 
 ## Examples
 
-A simple way for a relying party to report updates without tracking any additional state is to send a `currentCredentials` report after every successful sign-in (note that this can be done even if WebAuthn wasn't used to sign in).
+A simple way for a relying party to report updates without tracking any additional state is to call `signalCurrentUserDetails` and `signalAllAcceptedCredentialIds` after every successful sign-in (note that this can be done even if WebAuthn wasn't used to sign in).
 
 ```javascript
-await PublicKeyCredential.signal({
-  currentCredentials: {
-    rpId: "example.com",
-    userId: "M2YPl-KGnA8", // same as user.id at creation time
-    user: {
-      name: "currentemail@relying-party.com",
-      userDisplayName: "J. Doe"
-    },
-    allAcceptedCredentalIds: [
-      // IDs of all accepted credentials
-      "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA",
-      "Bq43BPs"
-    ]
-  }
+await PublicKeyCredential.signalAllAcceptedCredentialIds({
+  rpId: "example.com",
+  userId: "M2YPl-KGnA8", // same as user.id at creation time
+  allAcceptedCredentalIds: [
+     // IDs of all accepted credentials
+    "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA",
+    "Bq43BPs"
+  ]
+});
+
+await PublicKeyCredential.signalCurrentUserDetails({
+  rpId: "example.com",
+  userId: "M2YPl-KGnA8", // same as user.id at creation time
+  name: "currentemail@relying-party.com",
+  displayName: "J. Doe"
 });
 ```
 
 If a relying party receives an assertion with a credential that it does not recognize, it can report this back to the client. Note that it is safe to do this even if no user is signed in, as long as the credential id was already observed from this client.
 
 ```javascript
-await PublicKeyCredential.signal({
-  unknownCredential: {
-    rpId: "example.com",
-    credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA"
-  }
+await PublicKeyCredential.signalUnknownCredentialId({
+  rpId: "example.com",
+  credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA"  // b64-url
 });
 ```
 
-If the user revokes or deletes a credential, e.g. in an account settings UI on the relying party's website, the relying party can opportunistically report this at that time with the `unknownCredential` type. However this will only have effect if the user agent is able to route the report to the same credential provider that created this credential. It may be better to send a `currentCredentials` report instead, with a complete list of valid credential IDs. In this case the `user` attributes can be omitted to signal they should not be updated.
-
-Similarly, if a user changes their user- or display names while signed in, e.g. in an account settings UI, this can be reported to the current user agent without listing accepted credential ids:
-
-```javascript
-await PublicKeyCredential.signal({
-  currentCredentials: {
-    rpId: "example.com",
-    userId: "M2YPl-KGnA8", // same as user.id at creation time
-    user: {
-      name: "currentemail@relying-party.com",
-      userDisplayName: "J. Doe"
-    }
-  }
-});
-```
-
-In that case no credentials will be marked for removal. There is no _harm_ in also reporting accepted credential IDs, and indeed that report may reach credential providers that have outdated credentials and haven't received previous reports. But the choice is there if e.g. loading the list of accepted credentials would require additional (re-)authentication of the user, or other reasons that data isn't easily available on the server.
+If the user revokes or deletes a credential, e.g. in an account settings UI on the relying party's website, the relying party can opportunistically report this at that time with `signalUnknownCredentialId`. However this will only have effect if the user agent is able to route the report to the same credential provider that created this credential. It may be better to send a `signalAllAcceptedCredentialIds` report instead, with a complete list of valid credential IDs.
