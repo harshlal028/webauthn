@@ -1,11 +1,11 @@
-# Explainer: WebAuthn Conditional UI
+# Explainer: WebAuthn Ambient UI
 ## Author:
 Ken Buchanan \<kenrb@chromium.org\>
 
 _Last updated: 10-Sep-2024_
 
 ## Summary
-This explainer describes an augmentation to [WebAuthn Conditional Mediation](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) that allows a Relying Party (RP) to trigger a WebAuthn sign-in flow when eligible discoverable credentials are available without a login form being present on the page.
+This explainer describes an augmentation to [WebAuthn Conditional Mediation](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) that allows a Relying Party (RP) to trigger a WebAuthn sign-in flow when eligible discoverable credentials are available without a login form being present on the page. We are calling this enhancement Ambient UI.
 
 User agents would display the credentials to the user on an unobtrusive UI surface such as a bubble. Optionally, they can integrate other [Credential Management API](https://www.w3.org/TR/credential-management-1/) credential types such as passwords into the same surface.
 
