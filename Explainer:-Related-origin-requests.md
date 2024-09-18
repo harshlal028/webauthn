@@ -1,3 +1,9 @@
+> [!IMPORTANT]  
+> This document is no longer maintained. 
+>
+> For details about Related Origin Requests, please visit https://passkeys.dev/docs/advanced/related-origins/.
+
+
 ## Background
 All WebAuthn credentials are associated with a single [Relying Party ID](https://www.w3.org/TR/webauthn-2/#rp-id) (“RP ID”), which is essentially a domain name, and all WebAuthn requests are processed in the context of an RP ID. An origin can use any RP ID formed by discarding zero or more labels from the left of its [effective domain](https://html.spec.whatwg.org/multipage/browsers.html#concept-origin-effective-domain) until it hits an [effective TLD](https://en.wikipedia.org/wiki/Public_Suffix_List). So `www.example.com` can use the RP IDs `www.example.com` or `example.com`. But not `com`, because that’s an eTLD.
 
