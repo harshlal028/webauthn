@@ -25,6 +25,12 @@ This pattern poses two main problems, given the current available APIs.
 
 The first case in particular is not only tied to explicit revocation or account deletion as requested by users. RPs may have policies that require them to revoke credentials after periods of inactivity. A common problem is also that the same user ends up with multiple accounts on a single RP unintentionally and may have a hard time keeping track of which accounts they want to use. Here the solution of account deletion or consolidation misses the mark if it cannot be represented in credential selection UI.
 
+## Non-goals
+
+Signal methods do not allow credential providers to update information stored by relying parties (e.g. if a user changes deletes a passkey from their password manager).
+
+Signal methods do not allow relying parties to query the availability, name, or display name of existing credentials.
+
 ## Solution
 
 A new set of methods, `PublicKeyCredential.signal*`, allow relying parties to report such state updates back to user agents, who can forward these to the underlying credential providers. The API is opportunistic as there is no guarantee that the correct credential provider is reachable on the current client. Note that any credential provider action is optional and at the discretion of each provider implementation.
