@@ -153,3 +153,16 @@ await PublicKeyCredential.signalUnknownCredentialId({
 ```
 
 Then the user agent can inform the user that the credential is not valid and delete it or hide it from new sign in attempts. This situation can happen if e.g. the user removes the credential on the site using a browser or device that does not have access to that credential, or if the site chooses to revoke the credential for policy reasons. Before the signal methods, the credential would have been offered to the user for as long as they did not manually remove it using their credential manager settings.
+
+## Alternatives considered
+
+### Tell sites to override credentials instead
+
+If a site creates a new credential on a provider for the same `user.id`, any existing credential would have been overwritten. In theory, this could be used instead of the `signalCurrentUserDetails` method. However, this approach is fraught:
+* From the perspective of the browser, this is no different to creating a new credential, so the UI can be very confusing as it appears to the user that they are making a new credential as opposed to updating an existing one.
+* There is no way for sites to restrict the operation to credential providers the user already has a credential for. Therefore, it's possible a user accidentally chooses a different credential provider and really does create a new credential instead.
+* The site and user would have to go through this process for every credential they have associated to a site.
+
+### Design the signal methods so they return success or failure
+
+During early design, we considered having the signal methods return whether credentials were updated or not. This would help sites tailor the experience after calling the methods. However, this would also reveal the existence of credentials to the site, so it would require some form of confirmation from the user. We decided against returning any information on the status of the invocation to avoid the need to prompt the user.
