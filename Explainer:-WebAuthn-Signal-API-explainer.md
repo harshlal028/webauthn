@@ -102,26 +102,46 @@ Note that it's at the provider’s discretion how to handle conflicts between ma
 
 ## Examples
 
-A simple way for a relying party to report updates without tracking any additional state is to call `signalCurrentUserDetails` and `signalAllAcceptedCredentialIds` after every successful sign-in (note that this can be done even if WebAuthn wasn't used to sign in).
+### A user updates their username with a site
+
+A user changes their username with a site, e.g. through the site settings. The user has passkeys. Before the signal* methods, the only option to keep the passkeys `user.name` attribute in sync with the site would be for the user to manually visit their credential providers settings and change the value themselves. Otherwise, on sign-in, the wrong information would be displayed, leaving the user confused at best and frustrated at worst.
+
+With the signal method, as soon as the user updates their username, the site calls:
+
+```javascript
+await PublicKeyCredential.signalCurrentUserDetails({
+  rpId: "example.com",
+  userId: "M2YPl-KGnA8", // same as user.id at creation time
+  name: "newusername",
+  displayName: "New Display Name"
+});
+```
+
+The next time the user signs in, the browser will offer credentials with a name that match the newly chosen name.
+
+### A user removes a credential from a site
+
+A user removes a credential from a site, e.g. through the site settings. Before the signal methods, if the user did not go through their credential provider settings to manually remove the same credential, the credential provider would still offer it on sign-in. This would be confusing (after all, the user removed the corresponding entry on the site!) and attempting to use that credential would result in the site returning an error.
+
+With the new signal methods, after a credential is removed, the site can call
 
 ```javascript
 await PublicKeyCredential.signalAllAcceptedCredentialIds({
   rpId: "example.com",
   userId: "M2YPl-KGnA8", // same as user.id at creation time
   allAcceptedCredentalIds: [
-     // IDs of all accepted credentials
+     // IDs of all accepted credentials, minus the credential that was removed
     "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA",
     "Bq43BPs"
   ]
 });
-
-await PublicKeyCredential.signalCurrentUserDetails({
-  rpId: "example.com",
-  userId: "M2YPl-KGnA8", // same as user.id at creation time
-  name: "currentemail@relying-party.com",
-  displayName: "J. Doe"
-});
 ```
+
+This will result in the browser notifying the credential manager, which can then remove or hide the credential from future sign in attempts.
+
+If the user revokes or deletes a credential, e.g. in an account settings UI on the relying party's website, the relying party can opportunistically report this at that time with `signalUnknownCredentialId`. However this will only have effect if the user agent is able to route the report to the same credential provider that created this credential. It may be better to send a `signalAllAcceptedCredentialIds` report instead, with a complete list of valid credential IDs.
+
+### A user attempts to sign in with a credential that is no longer valid
 
 If a relying party receives an assertion with a credential that it does not recognize, it can report this back to the client. Note that it is safe to do this even if no user is signed in, as long as the credential id was already observed from this client.
 
@@ -132,4 +152,4 @@ await PublicKeyCredential.signalUnknownCredentialId({
 });
 ```
 
-If the user revokes or deletes a credential, e.g. in an account settings UI on the relying party's website, the relying party can opportunistically report this at that time with `signalUnknownCredentialId`. However this will only have effect if the user agent is able to route the report to the same credential provider that created this credential. It may be better to send a `signalAllAcceptedCredentialIds` report instead, with a complete list of valid credential IDs.
+Then the user agent can inform the user that the credential is not valid and delete it or hide it from new sign in attempts. This situation can happen if e.g. the user removes the credential on the site using a browser or device that does not have access to that credential, or if the site chooses to revoke the credential for policy reasons.
