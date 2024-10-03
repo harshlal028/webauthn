@@ -27,7 +27,7 @@ The first case in particular is not only tied to explicit revocation or account 
 
 ## Non-goals
 
-Signal methods do not allow credential providers to update information stored by relying parties (e.g. if a user changes deletes a passkey from their password manager).
+Signal methods do not allow credential providers to update information stored by relying parties (e.g. if a user changes or deletes a credential from their credential manager settings).
 
 Signal methods do not allow relying parties to query the availability, name, or display name of existing credentials.
 
@@ -152,4 +152,4 @@ await PublicKeyCredential.signalUnknownCredentialId({
 });
 ```
 
-Then the user agent can inform the user that the credential is not valid and delete it or hide it from new sign in attempts. This situation can happen if e.g. the user removes the credential on the site using a browser or device that does not have access to that credential, or if the site chooses to revoke the credential for policy reasons.
+Then the user agent can inform the user that the credential is not valid and delete it or hide it from new sign in attempts. This situation can happen if e.g. the user removes the credential on the site using a browser or device that does not have access to that credential, or if the site chooses to revoke the credential for policy reasons. Before the signal methods, the credential would have been offered to the user for as long as they did not manually remove it using their credential manager settings.
