@@ -26,7 +26,7 @@ WebAuthn is mirrored into mobile APIs so that credentials can work across platfo
 ## Proposal
 The best current option for sites with these issues is to use redirects and iframes to centralise the use of WebAuthn on a single domain. But the feedback is clear that this is a major impediment to adoption and also that these solutions may (or do) run afoul of privacy controls that browsers are implementing. Thus we seek to build a more explicit solution.
 
-Thus we propose a [well-known URL](https://www.rfc-editor.org/rfc/rfc5785.html) where an origin can list other origins that are authorized to use it as an RP ID. The URL is `https://{RP ID}/.well-known/webauthn`. It must be served with [content type](https://datatracker.ietf.org/doc/html/rfc9110#name-content-type) of `application/json` and contain a single [JSON](https://datatracker.ietf.org/doc/html/rfc8259) object. For example:
+Thus we propose a [well-known URL](https://www.rfc-editor.org/rfc/rfc5785.html) where an origin can list other origins that are authorized to use it as an RP ID. The URL is `https://{RP ID}/.well-known/webauthn`. It must be served with [content type](https://datatracker.ietf.org/doc/html/rfc9110#name-content-type) of `application/json`, using HTTPS, and contain a single [JSON](https://datatracker.ietf.org/doc/html/rfc8259) object. For example:
 
 ```json
 {
@@ -38,7 +38,7 @@ Thus we propose a [well-known URL](https://www.rfc-editor.org/rfc/rfc5785.html) 
 }
 ```
 
-The processing of WebAuthn requests would be altered so that, when processing the RP ID parameter [during credential creation](https://www.w3.org/TR/webauthn-2/#CreateCred-DetermineRpId) or [during credential assertion](https://www.w3.org/TR/webauthn-2/#GetAssn-DetermineRpId), before returning a [SecurityError](https://webidl.spec.whatwg.org/#securityerror), the user agents fetches the URL specified above and performs the following processing given the requested RP ID, _rpIdRequested_:
+The processing of WebAuthn requests would be altered so that, when processing the RP ID parameter [during credential creation](https://www.w3.org/TR/webauthn-2/#CreateCred-DetermineRpId) or [during credential assertion](https://www.w3.org/TR/webauthn-2/#GetAssn-DetermineRpId), before returning a [SecurityError](https://webidl.spec.whatwg.org/#securityerror), the user agents fetches the URL specified above (without credentials and without referrer) and performs the following processing given the requested RP ID, _rpIdRequested_:
 
 1. If the fetch fails, does not have a content type of `application/json`, or does not have a status code (after following redirects) of 200, then return a SecurityError.
 2. If the body of the resource is not a valid JSON object then return a SecurityError.
