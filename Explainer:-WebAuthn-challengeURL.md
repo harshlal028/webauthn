@@ -39,15 +39,24 @@ For assertion requests, the fetch is initiated when the user performs an authori
 For both kinds of requests, the `clientData` cannot be passed to the authenticator until the fetch response is received and processed by the user agent. The ceremony proceeds as normal once the challenge byte array is available.
 
 ### Challenge request
-The request is a credentialed HTTP GET request sent to the provided URL.
+The request is an uncredentialed HTTP GET request sent to the provided URL. The URL must use `https` and be same-site with the RP's page. It can include query parameters with session information.
 
 ### Challenge response
-The response must have Content-type: application/octet-stream, with contents being at least 16 bytes in length, and contain no other data than the challenge.
+The response must have `Content-type: application/x-webauthn-challenge` as a header. Its contents must be at least 16 bytes in length, and contain no other data than the challenge.
 
 ## Security
-The fetch request is credentialed (cookie- or token-bearing), as if it had been initiated directly as a Fetch API call by the RP’s script, and is similarly restricted by same-origin policy.
+If this is replacing a flow in which the RP performs a fetch for the challenge and then calls the WebAuthn API, an ideal form of this feature would be to add an instance of Fetch's `resourceRequest` into the credential options, and have the browser treat it like a normal fetch request. However, this is problematic for requests that are passed to passkey providers that are not browsers, including calls to platform APIs. These will typically not have access to the user's session cookies, and lack important context to perform a fetch securely.
 
-If the RP wishes to use a different origin in the `challengeURL` from what its sign-in page was served from, it can configure [cross-origin resource sharing](https://fetch.spec.whatwg.org/#cors-protocol) to prevent the request’s rejection with a security error.
+The primary concern is that this could be a vector to access or modify cross-origin resources that the page's script itself cannot access. The software component that performs the fetch (`fetching application`) could easily provide a bypass to browser-implemented protections, such as [Private Network Access](https://wicg.github.io/private-network-access/) restrictions. The risk is particularly acute since data obtained from the fetch will be returned to the RP as part of the response's `clientData`.
+
+The following constraints can be applied to mitigate that risk:
+* The user agent must reject any URL that does not use the `https` scheme.
+* The user agent must reject any URL that is not same-site with the RP (i.e. under the same registrable domain).
+* The user agent must ensure that the request conforms to page's [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), in particular the `default-src` directive.
+* The fetching application must send the challengeURL request uncredentialed.
+* The fetching application must not follow redirects.
+* The fetching application must reject a response if there is any error in TLS certificate validation.
+* The fetching application must reject a response that does not have the specified Content-type header.
 
 ## Alternatives
 
