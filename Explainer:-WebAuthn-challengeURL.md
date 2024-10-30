@@ -2,7 +2,7 @@
 ## Author:
 Ken Buchanan \<kenrb@chromium.org\>
 
-_Last updated: 08-Oct-2024_
+_Last updated: 30-Oct-2024_
 
 ## Summary
 This explainer describes a new parameter for [PublicKeyCredentialRequestOptions](https://www.w3.org/TR/webauthn/#dictdef-publickeycredentialrequestoptions) and [PublicKeyCredentialCreationOptions](https://www.w3.org/TR/webauthn/#dictdef-publickeycredentialcreationoptions) that provides a URL through which the user agent can obtain a [challenge](https://www.w3.org/TR/webauthn/#sctn-cryptographic-challenges), in lieu of embedding the challenge directly into the request.
