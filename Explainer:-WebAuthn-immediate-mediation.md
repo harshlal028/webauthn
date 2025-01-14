@@ -1,5 +1,5 @@
 ## Author
-Adem Derinel <<derinel@google.com>
+Adem Derinel <<derinel@google.com>>
 
 Last updated: 13-Jan-2025
 
@@ -40,7 +40,8 @@ try {
     },
     mediation: 'immediate'
   });
-} catch (error) {  if (error.name === 'NotFoundError') {
+} catch (error) {  
+  if (error.name === 'NotFoundError') {
     // handle the no credential case
   } else {
     // other cases
@@ -78,7 +79,8 @@ try {
   });
   // Site will also show a button to trigger a modal flow
   // to handle Incognito and security key users
-} catch (error) {  if (error.name === 'NotFoundError') {
+} catch (error) {  
+  if (error.name === 'NotFoundError') {
     // No immediate WebAuthn, federated or password credentials found.
     // The relying party can fallback to their preferred solution such as
     // asking the user's phone number / email.
