@@ -2,7 +2,7 @@
 
 **Author:** Pascoe <[pascoe@apple.com](mailto:pascoe@apple.com)>
 
-**Last update:** August 16, 2023
+**Last update:** January 16, 2025
 
 ## Summary
 
@@ -19,8 +19,6 @@ A consumer RP uses username and password login for most of their users. The rely
 
 * A user visits the login page of the RP's website. They see a standard username and password form.
 
-* The login form starts a conditional mediation request with extension `conditionalCreate: true`.
-
 * Their user agent offers to AutoFill their saved username and password. The user accepts the suggestion.
 
 * The RP checks the user's credentials and collects any nessesary information to register a credential.
@@ -34,24 +32,6 @@ A consumer RP uses username and password login for most of their users. The rely
 From the user's point of view, the experience is the same; they accept the first AutoFill suggestion to get logged in to their account.
 
 ## API
-
-### Assertion
-
-To inform the user agent that it's desired for a credential to be created whenever an authentication ceremony was mediated via non-WebAuthn means.
-
-```javascript
-const registration = await navigator.credentials.get({
-  mediation: 'conditional'
-  publicKey: {
-    ...
-    extensions: {
-      conditionalCreate: true,
-    },
-  },
-});
-```
-
-This call at assertion time allows the user agent to collect consent for credential creation at the time the authentication ceremony is mediated.
 
 ### Creation
 
