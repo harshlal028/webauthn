@@ -1,11 +1,13 @@
 ## Author
 Adem Derinel <<derinel@google.com>>
 
-Last updated: 13-Jan-2025
+Ken Buchanan <<kenrb@chromium.org>>
+
+Last updated: 24-Jan-2025
 
 ## Summary
 
-We propose an “immediate” mediation modality for WebAuthn `get()` requests which mirrors APIs on Android and iOS, and the “password” method in Credential Management, in response to requests from sites. This modality fails promptly if no credentials are immediately available, and thus allows sites to direct users to fallback sign-in methods in that case.
+We propose an “immediate” mediation modality for WebAuthn and password `get()` requests which mirrors the `preferImmediatelyAvailable` API properties on Android and iOS, in response to requests from sites. This modality fails promptly if no credentials are immediately available, and thus allows sites to direct users to fallback sign-in methods in that case.
 
 ## Background
 
@@ -14,11 +16,9 @@ WebAuthn currently provides two UI flows for sign-in:
 * Modal: browser UI always appears. The returned promise resolves when the user exercises a credential or dismisses the UI.  
 * Conditional: browser UI may appear, typically integrated with autofill on a text box. The returned promise only resolves if the user exercises a credential.
 
-Conditional UI has seen significant uptake but it requires an input field as the first step for authentication. Relying parties which want to go formless thus cannot use it. Also, users may ignore autofill and immediately enter their username manually.
+The `preferImmediatelyAvailable` option on mobile platforms provides a lower-friction flow when there is an eligible credential. In that case it immediately displays UI containing available credentials, but if no credential is available then it returns an error so that the calling application can provide alternative sign-in methods. This is similar to conditional UI on the web, but in that case the relying party does not learn whether a credential is available and therefore has to provide all sign-in options on a single surface.
 
-Because the conditional UI is not always suitable, several sites make an educated guess about whether the user is likely to have an applicable credential and trigger the modal flow automatically. But the costs of guessing incorrectly are high as the resulting UI can be quite confusing to the user: these users may be prompted for the hybrid flow, but the hybrid flow is time consuming and not always applicable.
-
-For a site where only a fraction of users have WebAuthn credentials (which is overwhelmingly common, for now), WebAuthn has no great answer for sites which want to implement a “Sign-in” button. We ultimately also want to design an API to help realize the original design of Credential Management and support sites making `get()` requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
+For a site where only a fraction of users have WebAuthn credentials (which is overwhelmingly common, for now), WebAuthn has no great answer for sites which want to implement a “Sign-in” button. We ultimately also want to design an API to help realize the original design of Credential Management and support sites making get() requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
 
 ![Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.](https://github.com/user-attachments/assets/9deaa678-801b-485b-8298-b79ea8081b28)
 
@@ -60,7 +60,7 @@ This API risks disadvantaging users of security keys, and those who wish to keep
 
 On supported browsers, password credentials (i.e. `navigator.credentials.get({password: true})`) return immediately when there are no passwords available.
 
-Federated credentials and passwords can also support `mediation: ”immediate”` if needed to make a more coherent sign-in flow. With the increased support, relying parties can choose which credential type they want to use as the “primary” sign-in flow and implement the follow-up authentication methods as backup.
+Federated credentials and passwords can also support immediate mediation if needed to make a more coherent sign-in flow. With the increased support, relying parties can choose which credential type they want to use as the “primary” sign-in flow and implement the follow-up authentication methods as backup.
 
 While not addressed in this explainer, a future direction of requesting WebAuthn, federated and password credentials together could look like
 
@@ -90,30 +90,30 @@ try {
 
 ## Example use cases
 
-Consider a relying party with an existing user base. They want to encourage users to adopt WebAuthn for improved security but also need to support traditional passwords.
+Consider a relying party with an existing user base. They want to use a passkey as easily as possible for users that have them, but users that don’t have passkeys should see the standard sign-in UI. 
 
 The relying party’s goal is to provide a frictionless sign-in experience, minimizing confusion and unnecessary steps. They want to avoid overwhelming users with multiple sign-in options, especially those unfamiliar with passkeys. 
 
 Here's how the relying party could use the new API to achieve this:
 
-1. Upon page load, and after a user gesture (such as clicking a "Sign In" button), the relying party calls `navigator.credentials.get` with a `PublicKeyCredentialRequestOptions` object and `mediation: ”immediate”`. They may also include `password: true` in the request.  
-2. The browser checks the local authenticators for any local credentials. Ideally, this would be near-instantaneous.  
-3. If there are no local credentials  
+1. User navigates to the main page of the website (e.g. a shopping page).  
+2. Upon page load, and after a user gesture (such as clicking a "Sign In" button), the relying party calls `navigator.credentials.get` with a `PublicKeyCredentialRequestOptions` object and `mediation: ”immediate”`. They may also include `password: true` in the request.  
+3. The browser checks the local authenticators for any local credentials. Ideally, this would be near-instantaneous.  
+4. If there are no local credentials  
    1. The browser throws a `NotFoundError` to the relying party.  
    2. The relying party asks the user for more details (e.g. email address)  
    3. The relying party shows the alternative authentication mechanisms such as a password form, SMS OTP, or the WebAuthn hybrid flow. They can also offer to create a passwordless account if the user details are not in their system.  
-4. Otherwise (if there are local credentials):  
+5. Otherwise (if there are local credentials):  
    1. The browser presents the required UI to the user for authentication.
 
-![Example flow 1: User flows for a user with no local credentials. Without immediate mediation “Sign in” button would offer hybrid / security key flows, which are not common among users.](https://github.com/user-attachments/assets/73727190-3233-4f5e-bd53-a663a7e40531)
-
-***Example flow 1:** User flows for a user with no local credentials. Without immediate mediation “Sign in” button would offer hybrid / security key flows, which are not common among users.*
-
-![Example flow 2: User flow for a user with local credentials. If the user clicks “Cancel”, the relying party can decide to show a fallback mechanism.](https://github.com/user-attachments/assets/43c112fc-0daf-46fe-a304-2189a767f873)
-
-***Example flow 2:** User flow for a user with local credentials. If the user clicks “Cancel”, the relying party can decide to show a fallback mechanism.*
+![Example flows: If there are WebAuthn credentials (or passwords) locally, browser UI will prompt the user to select one. The user can choose another way in the browser UI to fallback to the sign-in / sign-up page. In the case of no WebAuthn credentials locally, the website should show the existing sign-in / sign-up page.)](https://github.com/user-attachments/assets/86da1af8-466b-415d-854d-06f92acf037a)
+***Example flows:** If there are WebAuthn credentials (or passwords) locally, browser UI will prompt the user to select one. The user can choose another way in the browser UI to fallback to the sign-in / sign-up page. In the case of no WebAuthn credentials locally, the website should show the existing sign-in / sign-up page.*
 
 ## Privacy considerations
+
+Currently the RP does not have a way to learn about the availability of WebAuthn credentials until the user interacts with browser API, authorizing the generation of an assertion. Under this proposal that would change, enabling the RP to learn about the presence of immediately available credentials without such an authorization. It would not learn any information about the credentials until the assertion is returned, but the single bit available from the API returning a `NotFoundError` or not represents a relaxation of WebAuthn privacy protections.
+
+We propose the following measures to mitigate the potential for abuse of that relaxation:
 
 ### **User gesture requirement**
 
