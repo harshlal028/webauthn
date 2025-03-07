@@ -37,12 +37,12 @@ A new set of methods, `PublicKeyCredential.signal*`, allow relying parties to re
 
 `PublicKeyCredential.signal*` methods return a promise that will reject if there are any errors parsing a report (e.g. an invalid base64url string, or claiming an invalid RPID). However, the result will not include any information about how a report was processed. This is to allow for implementations that do not collect consent from the user before e.g. updating a credential's name without leaking leaking information to the RP about the state of the credentials.
 
-### `PublicKeyCredential.signalUnknownCredentialId`
+### `PublicKeyCredential.signalUnknownCredential`
 
 This method names a credential ID and indicates that the relying party would reject an assertion with that credential because the credential ID is unknown to the RP.
 
 ```javascript
-PublicKeyCredential.signalUnknownCredentialId({
+PublicKeyCredential.signalUnknownCredential({
   rpId: "example.com",
   credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA" // b64-url cred ID
 });
@@ -54,12 +54,12 @@ _Example provider action:_ The credential may be marked for omission from future
 
 This situation may arise, for example, because the credential was revoked, or because the RP performed a create operation but failed to successfully store the public key on its backend.
 
-### `PublicKeyCredential.signalAllAcceptedCredentialIds`
+### `PublicKeyCredential.signalAllAcceptedCredentials`
 
 This report names a `user.id` value and all accepted credential IDs.
 
 ```javascript
-PublicKeyCredential.signalAllAcceptedCredentialIds({
+PublicKeyCredential.signalAllAcceptedCredentials({
   rpId: "example.com",
   userId: "M2YPl-KGnA8",  // b64-url
   allAcceptedCredentialIds: [
@@ -126,7 +126,7 @@ A user removes a credential from a site, e.g. through the site settings. Before 
 With the new signal methods, after a credential is removed, the site can call
 
 ```javascript
-await PublicKeyCredential.signalAllAcceptedCredentialIds({
+await PublicKeyCredential.signalAllAcceptedCredentials({
   rpId: "example.com",
   userId: "M2YPl-KGnA8", // same as user.id at creation time
   allAcceptedCredentalIds: [
@@ -139,14 +139,14 @@ await PublicKeyCredential.signalAllAcceptedCredentialIds({
 
 This will result in the browser notifying the credential manager, which can then remove or hide the credential from future sign in attempts.
 
-If the user revokes or deletes a credential, e.g. in an account settings UI on the relying party's website, the relying party can opportunistically report this at that time with `signalUnknownCredentialId`. However this will only have effect if the user agent is able to route the report to the same credential provider that created this credential. It may be better to send a `signalAllAcceptedCredentialIds` report instead, with a complete list of valid credential IDs.
+If the user revokes or deletes a credential, e.g. in an account settings UI on the relying party's website, the relying party can opportunistically report this at that time with `signalUnknownCredential`. However this will only have effect if the user agent is able to route the report to the same credential provider that created this credential. It may be better to send a `signalAllAcceptedCredential` report instead, with a complete list of valid credential IDs.
 
 ### A user attempts to sign in with a credential that is no longer valid
 
 If a relying party receives an assertion with a credential that it does not recognize, it can report this back to the client. Note that it is safe to do this even if no user is signed in, as long as the credential id was already observed from this client.
 
 ```javascript
-await PublicKeyCredential.signalUnknownCredentialId({
+await PublicKeyCredential.signalUnknownCredential({
   rpId: "example.com",
   credentialId: "vI0qOggiE3OT01ZRWBYz5l4MEgU0c7PmAA"  // b64-url
 });
