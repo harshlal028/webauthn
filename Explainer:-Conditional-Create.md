@@ -1,4 +1,4 @@
-# Explainer: WebAuthn Conditional Registration Extension
+# Explainer: WebAuthn Conditional Create
 
 **Author:** Pascoe <[pascoe@apple.com](mailto:pascoe@apple.com)>
 
