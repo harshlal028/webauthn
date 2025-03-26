@@ -1,7 +1,7 @@
 Since the questionnaire has not previously been performed for WebAuthn L1 or L2,
 the following answers pertain to all of WebAuthn, not just the additions in L3.
 
-## 01.  What information does this feature expose, and for what purposes?
+# 01.  What information does this feature expose, and for what purposes?
 
 In summary: information about cryptographic authentication keys created using the API,
 and authentication signatures created with those keys.
@@ -138,7 +138,7 @@ The following parts are available only with the user's authorization to create o
   Assuming compliant authenticator implementation this provides no fingerprinting information and no identifying information not already implied by the credential ID.
 
 
-## 02.  Do features in your specification expose the minimum amount of information necessary to implement the intended functionality?
+# 02.  Do features in your specification expose the minimum amount of information necessary to implement the intended functionality?
 
 In spirit yes, much of the information is security-critical:
 
@@ -198,7 +198,7 @@ but help improve security or the user experience:
   that degrades gracefully and for example doesn't offer attempts to use features that are known to be unavailable.
 
 
-## 03.  Do the features in your specification expose personal information, personally-identifiable information (PII), or information derived from either?
+# 03.  Do the features in your specification expose personal information, personally-identifiable information (PII), or information derived from either?
 
 No. The RP could choose to store personal information, PII or information derived from either
 in a user handle, but WebAuthn actively recommends against this.
@@ -214,7 +214,7 @@ Access to this feature is strictly controlled as explained above,
 and cannot be enabled at solely the RP's discretion.
 
 
-## 04.  How do the features in your specification deal with sensitive information?
+# 04.  How do the features in your specification deal with sensitive information?
 
 Whether the user has a given kind of authenticator may be sensitive information:
 for example, a user who owns a dedicated external security key device
@@ -232,7 +232,7 @@ by inspecting the User-Agent string or other browser fingerprinting.
 We are not aware of any other sensitive information exposed by WebAuthn.
 
 
-## 05.  Does data exposed by your specification carry related but distinct information that may not be obvious to users?
+# 05.  Does data exposed by your specification carry related but distinct information that may not be obvious to users?
 
 Yes, mainly in the form of attestation and extensions:
 
@@ -266,7 +266,7 @@ Yes, mainly in the form of attestation and extensions:
     by some external mechanism and explicitly tagged as associated with that RP.
 
 
-## 06.  Do the features in your specification introduce state that persists across browsing sessions?
+# 06.  Do the features in your specification introduce state that persists across browsing sessions?
 
 Yes, by nature of being an authentication API.
 Credentials and any associated information persist across browsing sessions
@@ -280,7 +280,7 @@ The `largeBlob` extension allows RPs to store arbitrary mutable information asso
 This too is only accessible via an authentication ceremony with active user participation.
 
 
-## 07.  Do the features in your specification expose information about the underlying platform to origins?
+# 07.  Do the features in your specification expose information about the underlying platform to origins?
 
 Yes, attestation and the feature detection API expose information
 about the authenticator and underlying platform, as described in previous answers.
@@ -289,7 +289,7 @@ Attestation is exposed only with active user consent
 while the feature detection API may be accessed silently.
 
 
-## 08.  Does this specification allow an origin to send data to the underlying platform?
+# 08.  Does this specification allow an origin to send data to the underlying platform?
 
 Yes, using credential creation and request options objects
 based on interfaces defined by the Credential Management API.
@@ -311,7 +311,7 @@ These methods convey updated credential information,
 so their data fields are a subset of those in the intitial credential creation options.
 
 
-## 09.  Do features in this specification enable access to device sensors?
+# 09.  Do features in this specification enable access to device sensors?
 
 No.
 
@@ -321,12 +321,12 @@ but this extension is not known to be supported by any client implementation
 and is not included inline in WebAuthn L2 or L3.
 
 
-## 10.  Do features in this specification enable new script execution/loading mechanisms?
+# 10.  Do features in this specification enable new script execution/loading mechanisms?
 
 No.
 
 
-## 11.  Do features in this specification allow an origin to access other devices?
+# 11.  Do features in this specification allow an origin to access other devices?
 
 Yes: authenticators specifically designed for the purpose.
 This includes three categories:
@@ -345,7 +345,7 @@ WebAuthn does not allow RPs to enumerate available devices
 and does not expose device identifiers apart from any that may be present in attestation statements.
 
 
-## 12.  Do features in this specification allow an origin some measure of control over a user agent's native UI?
+# 12.  Do features in this specification allow an origin some measure of control over a user agent's native UI?
 
 No, only over when to display relevant UI and over some values that may be displayed.
 
@@ -363,7 +363,7 @@ modifies under what conditions clients show WebAuthn UI,
 but does not modify the form of that UI.
 
 
-## 13.  What temporary identifiers do the features in this specification create or expose to the web?
+# 13.  What temporary identifiers do the features in this specification create or expose to the web?
 
 None; all identifiers in WebAuthn L3 are long-lived.
 
@@ -381,50 +381,50 @@ This extension is not known to be supported by any client implementation
 and is not included inline in WebAuthn L2 or L3.
 
 
-## 14.  How does this specification distinguish between behavior in first-party and third-party contexts?
+# 14.  How does this specification distinguish between behavior in first-party and third-party contexts?
 
 WebAuthn defines Permissions Policy feature-identifier tokens
 for controlling use of WebAuthn in cross-origin iframes.
 Both are set to `'self'` by default, allowing use of WebAuthn only in same-origin context.
 
 
-## 15.  How do the features in this specification work in the context of a browser’s Private Browsing or Incognito mode?
+# 15.  How do the features in this specification work in the context of a browser’s Private Browsing or Incognito mode?
 
 As noted in question 6, WebAuthn enables creation of identifiers that persist after a browsing session ends.
 WebAuthn does not prescribe how its features should interact with private browsing modes.
 
 
-## 16.  Does this specification have both "Security Considerations" and "Privacy Considerations" sections?
+# 16.  Does this specification have both "Security Considerations" and "Privacy Considerations" sections?
 
 Yes, though they do not include all details elaborated on here.
 
 
-## 17.  Do features in your specification enable origins to downgrade default security protections?
+# 17.  Do features in your specification enable origins to downgrade default security protections?
 
 No. WebAuthn allows feature selection for some of its features,
 but these do not impact other security protections outside of WebAuthn.
 
 
-## 18.  What happens when a document that uses your feature is kept alive in BFCache (instead of getting destroyed) after navigation, and potentially gets reused on future navigations back to the document?
+# 18.  What happens when a document that uses your feature is kept alive in BFCache (instead of getting destroyed) after navigation, and potentially gets reused on future navigations back to the document?
 
 Nothing; WebAuthn state is not cached.
 
 
-## 19.  What happens when a document that uses your feature gets disconnected?
+# 19.  What happens when a document that uses your feature gets disconnected?
 
 WebAuthn does not preserve state between ceremonies,
 so new ceremonies are not affected.
 TODO: Who knows what happens to any in-progress ceremonies in this situation?
 
 
-## 20.  Does your spec define when and how new kinds of errors should be raised?
+# 20.  Does your spec define when and how new kinds of errors should be raised?
 
 Yes. The error conditions are carefully chosen to not leak unintended or sensitive information,
 and some error conditions require user consent before returning a particular error,
 otherwise returning the unspecified general error instead.
 
 
-## 21.  Does your feature allow sites to learn about the user's use of assistive technology?
+# 21.  Does your feature allow sites to learn about the user's use of assistive technology?
 
 Not as far as we know.
 
@@ -438,6 +438,6 @@ However, the greatest difference lies between uses of "platform authenticators",
 with ceremonies typically taking longer time for each authenticator category in approximately that order.
 
 
-## 22.  What should this questionnaire have asked?
+# 22.  What should this questionnaire have asked?
 
 (No answer)
