@@ -3,11 +3,11 @@ Adem Derinel <<derinel@google.com>>
 
 Ken Buchanan <<kenrb@chromium.org>>
 
-Last updated: 24-Jan-2025
+Last updated: 02-Apr-2025
 
 ## Summary
 
-We propose an “immediate” mediation modality for WebAuthn and password `get()` requests which mirrors the `preferImmediatelyAvailable` API properties on Android and iOS, in response to requests from sites. This modality fails promptly if no credentials are immediately available, and thus allows sites to direct users to fallback sign-in methods in that case.
+We propose an “immediate” mediation modality for WebAuthn and password `CredentialsContainer::get()` requests that mirrors the `preferImmediatelyAvailable` API properties on Android and iOS. This modality fails promptly if no credentials are immediately available, and thus allows sites to direct users to fallback sign-in methods in that case.
 
 ## Background
 
@@ -18,7 +18,7 @@ WebAuthn currently provides two UI flows for sign-in:
 
 The `preferImmediatelyAvailable` option on mobile platforms provides a lower-friction flow when there is an eligible credential. In that case it immediately displays UI containing available credentials, but if no credential is available then it returns an error so that the calling application can provide alternative sign-in methods. This is similar to conditional UI on the web, but in that case the relying party does not learn whether a credential is available and therefore has to provide all sign-in options on a single surface.
 
-For a site where only a fraction of users have WebAuthn credentials (which is overwhelmingly common, for now), WebAuthn has no great answer for sites which want to implement a “Sign-in” button. We ultimately also want to design an API to help realize the original design of Credential Management and support sites making get() requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
+For a site where only a fraction of users have WebAuthn credentials, WebAuthn has no great answer for sites that want to implement a “Sign-in” button. We ultimately also want to design an API to help realize the original design of Credential Management and support sites making `get()`` requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
 
 ![Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.](https://github.com/user-attachments/assets/9deaa678-801b-485b-8298-b79ea8081b28)
 
@@ -28,7 +28,7 @@ For a site where only a fraction of users have WebAuthn credentials (which is ov
 
 We propose a mediation type, `immediate` for `navigator.credentials.get()`.
 
-When such an option is set, the returned promise resolves with `NotFoundError` when there are no locally-available credentials; otherwise, the browser handles the authentication ceremony as if there were no mediation property set. Browsers are always free to return `NotFoundError` if they see fit. (See Privacy section, below.)
+When such an option is set, the returned promise resolves with `NotAllowedError` when there are no locally-available credentials; otherwise, the browser handles the authentication ceremony as if there were no mediation property set. Browsers are always free to return `NotAllowedError` if they see fit. (See Privacy section, below.)
 
 ```javascript
 try {
@@ -41,7 +41,7 @@ try {
     mediation: 'immediate'
   });
 } catch (error) {  
-  if (error.name === 'NotFoundError') {
+  if (error.name === 'NotAllowedError') {
     // handle the no credential case
   } else {
     // other cases
@@ -80,7 +80,7 @@ try {
   // Site will also show a button to trigger a modal flow
   // to handle Incognito and security key users
 } catch (error) {  
-  if (error.name === 'NotFoundError') {
+  if (error.name === 'NotAllowedError') {
     // No immediate WebAuthn, federated or password credentials found.
     // The relying party can fallback to their preferred solution such as
     // asking the user's phone number / email.
@@ -100,7 +100,7 @@ Here's how the relying party could use the new API to achieve this:
 2. Upon page load, and after a user gesture (such as clicking a "Sign In" button), the relying party calls `navigator.credentials.get` with a `PublicKeyCredentialRequestOptions` object and `mediation: ”immediate”`. They may also include `password: true` in the request.  
 3. The browser checks the local authenticators for any local credentials. Ideally, this would be near-instantaneous.  
 4. If there are no local credentials  
-   1. The browser throws a `NotFoundError` to the relying party.  
+   1. The browser throws a `NotAllowedError` to the relying party.  
    2. The relying party asks the user for more details (e.g. email address)  
    3. The relying party shows the alternative authentication mechanisms such as a password form, SMS OTP, or the WebAuthn hybrid flow. They can also offer to create a passwordless account if the user details are not in their system.  
 5. Otherwise (if there are local credentials):  
@@ -111,30 +111,26 @@ Here's how the relying party could use the new API to achieve this:
 
 ## Privacy considerations
 
-Currently the RP does not have a way to learn about the availability of WebAuthn credentials until the user interacts with browser API, authorizing the generation of an assertion. Under this proposal that would change, enabling the RP to learn about the presence of immediately available credentials without such an authorization. It would not learn any information about the credentials until the assertion is returned, but the single bit available from the API returning a `NotFoundError` or not represents a relaxation of WebAuthn privacy protections.
+Currently the RP does not have a way to learn about the availability of WebAuthn credentials until the user interacts with browser API, authorizing the generation of an assertion. Under this proposal that would change, enabling the RP to learn about the presence of immediately available credentials without such an authorization. It would not learn any information about the credentials until the assertion is returned, but the single bit available from the API returning immediately with a `NotAllowedError`, or having a long delay due to UI being shown to the user, represents a relaxation of WebAuthn privacy protections.
 
 We propose the following measures to mitigate the potential for abuse of that relaxation:
 
 ### **User gesture requirement**
 
-To mitigate silent probing of credential availability and fingerprinting, we are considering requiring a user gesture before this API call can be made. This user gesture can be a button click and we seek feedback from sites on this.
+To mitigate silent probing of credential availability and fingerprinting, we will require a user gesture before this API call can be made. The user gesture could be [any transient user activation](https://developer.mozilla.org/en-US/docs/Web/API/UserActivation). In particular this requirement makes it difficult for a site to do many calls with varying RP IDs.
 
 ### **Incognito and private sessions**
 
-In incognito or private sessions, any immediate mediation request should throw `NotFoundError`. To avoid incognito fingerprinting, this response can be randomly delayed by the browser to simulate the browser fetching credential metadata from the system.
+In incognito or private browsing sessions, any immediate mediation request should throw `NotAllowedError`. To avoid incognito fingerprinting, this response can be delayed by the browser to simulate the browser fetching credential metadata from the system.
 
 ### **Request with allowlists**
 
 Requests with allowlists should throw `NotAllowedError`. If a relying party queries for a list of credentials and gets a response indicating one exists, this could be used to infer whether the user has previously interacted with the site. Over time, this could allow tracking of users across different sessions. 
 
-### **Cancelation**
+### **Cancellation**
 
 Setting the `signal`  parameter on a request with immediate mediation is invalid as sites should not be able to programmatically dismiss any browser UI.
 
-### **Multi RP ID probing**
-
-A site could register every user on a unique subdomain then, using immediate mediation, probe every possible subdomain to find the identity of an unknown user. This is not terribly practical, and the user will ultimately see browser UI, but it is a concern. If implemented, a user gesture requirement would make this implausible. Otherwise some form of rate-limiting will be needed.
-
 ## Similar systems
 
-Both Android and iOS APIs support immediately available credential calls for sign in. Android Credential Manager will respond with `NoCredentialException` similar to `NotFoundError` DOMException when the sign in request prefers immediately available credentials but none are available.
+Both Android and iOS APIs support immediately available credential calls for sign in. Android Credential Manager will respond with `NoCredentialException` similar to `NotAllowedError` DOMException when the sign in request prefers immediately available credentials but none are available.
