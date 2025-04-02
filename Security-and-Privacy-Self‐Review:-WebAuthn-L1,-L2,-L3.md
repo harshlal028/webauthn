@@ -413,8 +413,7 @@ Nothing; WebAuthn state is not cached.
 # 19.  What happens when a document that uses your feature gets disconnected?
 
 WebAuthn does not preserve state between ceremonies,
-so new ceremonies are not affected.
-TODO: Who knows what happens to any in-progress ceremonies in this situation?
+so new ceremonies are not affected. In progress ceremonies are aborted.
 
 
 # 20.  Does your spec define when and how new kinds of errors should be raised?
