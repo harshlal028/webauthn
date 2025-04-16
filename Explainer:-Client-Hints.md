@@ -10,7 +10,7 @@ A new optional parameter to give WebAuthn clients hints about the desired starti
 
 ## Background
 
-`authenticatorAttachment` has traditionally been used by Relying Parties to tell WebAuthn clients which type of experience they want to trigger: one that uses the local authenticator built-in to the device (`platform`) or one that uses an external authenticator such as a security key (`cross-platform`). This is an "authoritative" option and the client is expected to restrict the available options based on this value (e.g. only show security key option when `cross-platform` is used).
+`authenticatorSelection.attachment` has traditionally been used by Relying Parties to tell WebAuthn clients which type of experience they want to trigger: one that uses the local authenticator built-in to the device (`platform`) or one that uses an external authenticator such as a security key (`cross-platform`). This is an "authoritative" option and the client is expected to restrict the available options based on this value (e.g. only show security key option when `cross-platform` is used).
 
 Passkeys changed some of that meaning as a passkey in a local authenticator could also be available to another device using cross-device authentication (CTAP 2.2 hybrid transports). This means that sending `authenticatorAttachment` = `cross-platform` now results in an experience driving the user to use their phone or a security key. In some environments, this can be very confusing.
 
