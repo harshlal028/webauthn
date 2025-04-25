@@ -3,7 +3,7 @@ Adem Derinel <<derinel@google.com>>
 
 Ken Buchanan <<kenrb@chromium.org>>
 
-Last updated: 02-Apr-2025
+Last updated: 25-Apr-2025
 
 ## Summary
 
@@ -18,7 +18,7 @@ WebAuthn currently provides two UI flows for sign-in:
 
 The `preferImmediatelyAvailable` option on mobile platforms provides a lower-friction flow when there is an eligible credential. In that case it immediately displays UI containing available credentials, but if no credential is available then it returns an error so that the calling application can provide alternative sign-in methods. This is similar to conditional UI on the web, but in that case the relying party does not learn whether a credential is available and therefore has to provide all sign-in options on a single surface.
 
-For a site where only a fraction of users have WebAuthn credentials, WebAuthn has no great answer for sites that want to implement a “Sign-in” button. We ultimately also want to design an API to help realize the original design of Credential Management and support sites making `get()`` requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
+For a site where only a fraction of users have WebAuthn credentials, WebAuthn has no great answer for sites that want to implement a “Sign-in” button. We ultimately also want to design an API to help realize the original design of Credential Management and support sites making `get()` requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
 
 ![Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.](https://github.com/user-attachments/assets/9deaa678-801b-485b-8298-b79ea8081b28)
 
@@ -31,22 +31,32 @@ We propose a mediation type, `immediate` for `navigator.credentials.get()`.
 When such an option is set, the returned promise resolves with `NotAllowedError` when there are no locally-available credentials; otherwise, the browser handles the authentication ceremony as if there were no mediation property set. Browsers are always free to return `NotAllowedError` if they see fit. (See Privacy section, below.)
 
 ```javascript
-try {
-  const cred = await navigator.credentials.get({
-    publicKey: {
-      challenge: ...,
-      rpId: 'example.com',
-      allowCredentials: [],
-    },
-    mediation: 'immediate'
-  });
-} catch (error) {  
-  if (error.name === 'NotAllowedError') {
-    // handle the no credential case
-  } else {
-    // other cases
-  }
-} 
+// Use `getClientCapabilities` for feature detection
+let immediateMediationAvailable = false;
+if (window.PublicKeyCredential && PublicKeyCredential.getClientCapabilities) {
+  const capabilities = await PublicKeyCredential.getClientCapabilities();
+  // `immediateGet` is a new capability for immediate mediation:
+  immediateMediationAvailable = capabilities.immediateGet === true;
+}
+
+if (immediateMediationAvailable) {
+  try {
+    const cred = await navigator.credentials.get({
+      publicKey: {
+        challenge: ...,
+        rpId: 'example.com',
+        allowCredentials: [],
+      },
+      mediation: 'immediate'
+    });
+  } catch (error) {
+    if (error.name === 'NotAllowedError') {
+      // handle the no credential or cancellation case
+    } else {
+      // other cases
+    }
+  } 
+}
 ```
 
 ### **Supporting cross-device authenticators**
@@ -81,7 +91,8 @@ try {
   // to handle Incognito and security key users
 } catch (error) {  
   if (error.name === 'NotAllowedError') {
-    // No immediate WebAuthn, federated or password credentials found.
+    // No immediate WebAuthn, federated or password credentials found, or 
+    // the user dismissed the browser UI.
     // The relying party can fallback to their preferred solution such as
     // asking the user's phone number / email.
   } 
