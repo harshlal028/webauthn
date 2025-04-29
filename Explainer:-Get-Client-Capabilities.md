@@ -72,7 +72,7 @@ enum ClientCapability {
 3. **Return Value:** The method returns a `Promise` that resolves with a `PublicKeyCredentialClientCapabilities` object.  
 4. **Structure:**  
    1. The keys of the record are `DOMString` values representing specific capabilities or extensions.  
-   2. Keys representing standard capabilities (like those potentially listed in `ClientCapability`) are simple strings (e.g., `"hybrid"`).  
+   2. Keys representing standard capabilities (in `ClientCapability`) are simple strings (e.g., `"hybrid"`).  
    3. Keys representing client support for WebAuthn Extensions MUST be prefixed with `"extension:"` followed by the extension identifier (e.g., `"extension:credProps"`).  
    4. The keys in the returned record MUST be sorted in ascending lexicographical order.  
    5. The values are booleans:  
