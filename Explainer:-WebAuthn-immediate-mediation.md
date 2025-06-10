@@ -20,7 +20,7 @@ The `preferImmediatelyAvailable` option on mobile platforms provides a lower-fri
 
 For a site where only a fraction of users have WebAuthn credentials, WebAuthn has no great answer for sites that want to implement a “Sign-in” button. We ultimately also want to design an API to help realize the original design of Credential Management and support sites making `get()` requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
 
-![Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.](https://github.com/user-attachments/assets/9deaa678-801b-485b-8298-b79ea8081b28)
+![Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.](https://github.com/user-attachments/assets/f4442367-4ce8-4096-90f8-89ac65837619)
 
 *Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.*
 
@@ -117,8 +117,9 @@ Here's how the relying party could use the new API to achieve this:
 5. Otherwise (if there are local credentials):  
    1. The browser presents the required UI to the user for authentication.
 
-![Example flows: If there are WebAuthn credentials (or passwords) locally, browser UI will prompt the user to select one. The user can choose another way in the browser UI to fallback to the sign-in / sign-up page. In the case of no WebAuthn credentials locally, the website should show the existing sign-in / sign-up page.)](https://github.com/user-attachments/assets/86da1af8-466b-415d-854d-06f92acf037a)
+![Example flows: If there are WebAuthn credentials (or passwords) locally, browser UI will prompt the user to select one. The user can choose another way in the browser UI to fallback to the sign-in / sign-up page. In the case of no WebAuthn credentials locally, the website should show the existing sign-in / sign-up page.)](https://github.com/user-attachments/assets/286f094e-b4e8-49c2-ad14-b6161d02aa5d)
 ***Example flows:** If there are WebAuthn credentials (or passwords) locally, browser UI will prompt the user to select one. The user can choose another way in the browser UI to fallback to the sign-in / sign-up page. In the case of no WebAuthn credentials locally, the website should show the existing sign-in / sign-up page.*
+
 
 ## Privacy considerations
 
