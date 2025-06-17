@@ -3,11 +3,15 @@ Adem Derinel <<derinel@google.com>>
 
 Ken Buchanan <<kenrb@chromium.org>>
 
-Last updated: 25-Apr-2025
+Last updated: 17-Jun-2025
 
 ## Summary
 
 We propose an “immediate” mediation modality for WebAuthn and password `CredentialsContainer::get()` requests that mirrors the `preferImmediatelyAvailable` API properties on Android and iOS. This modality fails promptly if no credentials are immediately available, and thus allows sites to direct users to fallback sign-in methods in that case.
+
+## Goal
+
+This feature aims to enable a sign-in flow with passkeys and managed passwords that does not require a user to visit a traditional sign-in page containing multiple sign-in methods for the user to choose between (such as a username/password form, multiple federated sign-in options, a recovery button, etc), while at the same time not changing the sign-in experience for users for whom passkeys or managed password are not available. When one or more such credential are available, a user who has reached a sign-in moment in their interaction with a site (such as, for example, by clicking a "Sign In" button) will see a browser dialog containing a list of existing eligible credentials for that site. When the user confirms the credential to use (or selects a credential, if multiple are shown), they can be immediately signed in.
 
 ## Background
 
@@ -61,10 +65,12 @@ if (immediateMediationAvailable) {
 
 ### **Supporting cross-device authenticators**
 
-This API risks disadvantaging users of security keys, and those who wish to keep credentials on their mobile device. We note that:
+The UI associated with this API will only show credentials that are known to the user agent or can be discovered without user action. Typically this will not include credentials stored on security keys or on mobile devices, which would be usable through the hybrid transport. We note that:
 
-1. If a security key supports credential enumeration, as in newer CTAP drafts, those credentials can be considered to be immediately available.  
+1. If a security key and the platform both support CTAP 2.2 credential enumeration, those credentials can be considered to be immediately available.  
 2. Sites will have to support another way to use WebAuthn credentials because, as noted in the Privacy section, we expect this API to always fail in Incognito/private browsing contexts.
+
+When security key credential enumeration is not available, the sign-in experience for users using security key credentials will typically remain unchanged. No UI will be shown from this call unless there are also credentials from that site available from a platform authenticator, after which the user will proceed to the site's sign-in page.
 
 ### **Other credential types**
 
