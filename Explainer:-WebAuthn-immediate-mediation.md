@@ -3,7 +3,7 @@ Adem Derinel <<derinel@google.com>>
 
 Ken Buchanan <<kenrb@chromium.org>>
 
-Last updated: 17-Jun-2025
+Last updated: 23-Jun-2025
 
 ## Summary
 
@@ -29,6 +29,8 @@ For a site where only a fraction of users have WebAuthn credentials, WebAuthn ha
 *Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.*
 
 ## API
+
+> Note from authors: We have received feedback suggesting that adding a value to the `mediation` enum might restrict use cases with some credential types. In particular, credentials such as FedCM or passwords have different client behaviour when the RP sets `mediation: "required"` vs `mediation: "optional"`. If we support combining those credentials with passkeys in `mediation: "immediate"`, RPs will have less control over non-passkey credential mediation on the associated UI than they currently do. There is ongoing discussion over whether a new field should be added.
 
 We propose a mediation type, `immediate` for `navigator.credentials.get()`.
 
