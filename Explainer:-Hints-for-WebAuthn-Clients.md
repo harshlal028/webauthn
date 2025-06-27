@@ -1,4 +1,4 @@
-# Explainer: WebAuthn Client Hints
+# Explainer: Hints for WebAuthn Clients
 
 **Author:** Tim Cappalli <[tim.cappalli@okta.com](mailto:tim.cappalli@okta.com)>
 
