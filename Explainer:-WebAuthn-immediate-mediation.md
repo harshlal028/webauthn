@@ -61,7 +61,7 @@ Below shows a flow that Immediate can enable. Given the amount of information th
 <img width="350" height="350" alt="A checkout screen with fields pre-populated from the user having signed in. There is a button to confirm and pay." src="https://github.com/user-attachments/assets/93f74908-2bb9-4e81-959b-f8677a86382b" />
 </p>
 
-There are numerous situations where a user can be interacting with a site and reaches a point where a sign-in will significantly improve their experience if it is available, but the site can still provide a fallback experience if it is not. Another example could be a user on a newspaper's homepage who clicks a paywalled article, and an Immediate sign-in would be better than seeing a truncated article with an account overlay. Or a user starts playing a video on a video-sharing site which play without embedded ads if they are signed in to their account.
+There are numerous situations where a user can be interacting with a site and reach a point where a sign-in will significantly improve their experience if it is available, but the site can still provide a fallback experience if it is not. Another example could be a user on a newspaper's homepage who clicks a paywalled article, and an Immediate sign-in would be better than seeing a truncated article with an account overlay. Or a user starts playing a video on a video-sharing site which play without embedded ads if they are signed in to their account.
 
 ## API
 
