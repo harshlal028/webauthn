@@ -3,7 +3,7 @@ Adem Derinel <<derinel@google.com>>
 
 Ken Buchanan <<kenrb@chromium.org>>
 
-Last updated: 23-Jun-2025
+Last updated: 11-Aug-2025
 
 ## Summary
 
@@ -18,7 +18,7 @@ This feature aims to enable a sign-in flow with passkeys and managed passwords t
 WebAuthn currently provides two UI flows for sign-in:
 
 * Modal: browser UI always appears. The returned promise resolves when the user exercises a credential or dismisses the UI.  
-* Conditional: browser UI may appear, typically integrated with autofill on a text box. The returned promise only resolves if the user exercises a credential.
+* Conditional: browser UI may appear, integrated with autofill on a form input field. The returned promise only resolves if the user selects a credential and completes the authentication ceremony.
 
 The `preferImmediatelyAvailable` option on mobile platforms provides a lower-friction flow when there is an eligible credential. In that case it immediately displays UI containing available credentials, but if no credential is available then it returns an error so that the calling application can provide alternative sign-in methods. This is similar to conditional UI on the web, but in that case the relying party does not learn whether a credential is available and therefore has to provide all sign-in options on a single surface.
 
@@ -27,6 +27,41 @@ For a site where only a fraction of users have WebAuthn credentials, WebAuthn ha
 ![Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.](https://github.com/user-attachments/assets/f4442367-4ce8-4096-90f8-89ac65837619)
 
 *Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.*
+
+### Comparison to Conditional UI
+Immediate is useful in many of the same situations that Conditional UI is, or can be, already used. Specifically: If the site is providing the user a chance to sign in, and it doesn't already know what authentication method the user will use, then both of these mediation options are useful. The advantage that Immediate provides is that it allows sign-in to be offered without presenting the user with all supported authentication options. Typically today this is a form with one or two input fields, and some number of alternatives.
+<p align="center">
+<img width="500" height="500" alt="Typical sign-in widget with username/password fields, a passkey button, a federated login button, and a password recovery option" src="https://github.com/user-attachments/assets/a4380abf-75af-45e9-93f5-d3c5e8ad6b87" />
+</p>
+
+Conditional UI has proven helpful to users on such UI, because autofill highlights easy sign-in options. Immediate, however, negates the need to show that at all.
+
+#### Is this polyfillable?
+Aside from typical existing sign-in experiences, many sites use more streamlined flows. There is also a question of how closely a site can build an Immediate-like experience using Conditional UI. The image below is an imagining of a dynamic sign-in widget drawn by the page, using Conditional UI.
+<p align="center">
+<img width="500" height="281" alt="A minimal sign-in widget containing a username field and an account recovery option. There is an autofill popup over it offering a passkey and a federated login option." src="https://github.com/user-attachments/assets/6cbb9898-e10c-44a2-b941-0fec4f4a74ad" />
+</p>
+
+> Note that providing a federated login option within autofill UI is not something that currently exists on the web, but it is a possible future exploration toward the goal of simplifying sign-in UI.
+
+If such a widget is drawn dynamically after a user clicks a "Sign In" button then that UI would approximate what Immediate is intended to achieve. But the site still has to be showing all fallback options, or at least have a button that the user would have to click to find them, because it doesn't know if Conditional UI is actually showing anything.
+
+More importantly, a fundamental constraint of Conditional UI is that it only works with a form input field, which is limiting not just in the visual experience but also in the use cases where it is appropriate. Immediate would remove the necessity of anchoring sign-in flows to textboxes.
+
+#### Contextual sign-in moments
+An example of a use case where that limitation becomes a problem is in the [Example Use Cases section below.](#example-use-cases). If a user is shopping on an e-commerce site without having logged in and initiates a checkout flow, the most common approach is to show a large form. This form can contain sign-in fields for users with existing accounts, but also fields for personal information such as address and phone number for users who will proceed to make a purchase without an account.
+<p align="center">
+<img width="500" height="510" alt="A checkout form that contains an option for signing in with a username and password, or else has many fields for manual entry of personal information necessary to complete the purchase." src="https://github.com/user-attachments/assets/efbc40ce-72cb-4e12-a7dd-43ab83c53fbf" />
+</p>
+
+Below shows a flow that Immediate can enable. Given the amount of information that is required if the user cannot sign in, this is not something that can be polyfilled as a regular sign-in might.
+<p align="center">
+<img width="350" height="350" alt="A shopping cart screen on an e-commerce site showing a running shoe in the cart, and a checkout button." src="https://github.com/user-attachments/assets/b711172c-fa50-4b56-9d9c-eeaa0d18e851" />
+<img width="350" height="350" alt="A chopping cart screen on an e-commerce site showing browser UI with a passkey that the user can choose to sign in." src="https://github.com/user-attachments/assets/63fa11a6-b845-413f-a0e0-f9f36e8c009d" />
+<img width="350" height="350" alt="A checkout screen with fields pre-populated from the user having signed in. There is a button to confirm and pay." src="https://github.com/user-attachments/assets/93f74908-2bb9-4e81-959b-f8677a86382b" />
+</p>
+
+There are numerous situations where a user can be interacting with a site and reaches a point where a sign-in will significantly improve their experience if it is available, but the site can still provide a fallback experience if it is not. Another example could be a user on a newspaper's homepage who clicks a paywalled article, and an Immediate sign-in would be better than seeing a truncated article with an account overlay. Or a user starts playing a video on a video-sharing site which play without embedded ads if they are signed in to their account.
 
 ## API
 
