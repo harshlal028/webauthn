@@ -160,7 +160,7 @@ Here's how the relying party could use the new API to achieve this:
 5. Otherwise (if there are local credentials):  
    1. The browser presents the required UI to the user for authentication.
 
-![Example flows: If there are WebAuthn credentials (or passwords) locally, browser UI will prompt the user to select one. The user can choose another way in the browser UI to fallback to the sign-in / sign-up page. In the case of no WebAuthn credentials locally, the website should show the existing sign-in / sign-up page.)](https://github.com/user-attachments/assets/286f094e-b4e8-49c2-ad14-b6161d02aa5d)
+![Example flows: If there are WebAuthn credentials (or passwords) locally, browser UI will prompt the user to select one. The user can choose another way in the browser UI to fallback to the sign-in / sign-up page. In the case of no WebAuthn credentials locally, the website should show the existing sign-in / sign-up page.)](https://github.com/user-attachments/assets/75f5f9c1-3ae8-4db2-857e-6852ebbd9382)
 ***Example flows:** If there are WebAuthn credentials (or passwords) locally, browser UI will prompt the user to select one. The user can choose another way in the browser UI to fallback to the sign-in / sign-up page. In the case of no WebAuthn credentials locally, the website should show the existing sign-in / sign-up page.*
 
 
