@@ -178,7 +178,7 @@ Specifically:
 * If UI is shown, the promise takes more than a short time to resolve, indicating that the user is being offered sign-in credentials for the site. If the user chooses not to select a credential for sign-in, the site still obtain the information that at least one credential exists.
 * If no UI is shown, the promise returns quickly. This can indicate that the user has no credential, although there are other reasons why UI might not have been shown so the conclusion would be less clear.
 
-The site would not learn any information about the contents of a credential (in particular, any identifying information) unless and until an assertion is returned (providing user consent), but the single bit available from the API returning immediately with a `NotAllowedError`, or having a long delay due to UI being shown to the user, represents a relaxation of WebAuthn privacy protections.
+The site would not learn any information about the contents of a credential (in particular, any identifying information) unless and until an assertion is returned (after the use has provided consent), but the single bit available from the API returning immediately with a `NotAllowedError`, or having a long delay due to UI being shown to the user, represents a relaxation of WebAuthn privacy protections.
 
 Potential consequences of this include:
 * User fingerprinting risk -- e.g. a single bit of information about a client can be combined with other available client-distinguishing information to attempt to identify users
