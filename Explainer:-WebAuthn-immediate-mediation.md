@@ -3,7 +3,7 @@ Adem Derinel <<derinel@google.com>>
 
 Ken Buchanan <<kenrb@chromium.org>>
 
-Last updated: 11-Aug-2025
+Last updated: 05-Sep-2025
 
 ## Summary
 
@@ -12,6 +12,12 @@ We propose an “immediate” mediation modality for WebAuthn and password `Cred
 ## Goal
 
 This feature aims to enable a sign-in flow with passkeys and managed passwords that does not require a user to visit a traditional sign-in page containing multiple sign-in methods for the user to choose between (such as a username/password form, multiple federated sign-in options, a recovery button, etc), while at the same time not changing the sign-in experience for users for whom passkeys or managed password are not available. When one or more such credential are available, a user who has reached a sign-in moment in their interaction with a site (such as, for example, by clicking a "Sign In" button) will see a browser dialog containing a list of existing eligible credentials for that site. When the user confirms the credential to use (or selects a credential, if multiple are shown), they can be immediately signed in.
+
+The use cases that this best supports are where a user has an account on the site, but the site does not know the identity of the user through previously set cookies. Some of the reasons why this commonly happens are:
+* Users create an account and passkey for a site on one device, and want to sign in to the site on a different device, where the passkey has been synced by their passkey provider.
+* The user is using a different browser on a device where they have previously signed in.
+* The user is using the same browser, but a different profile.
+* Cookies previously set by the site have expired.
 
 ## Background
 
@@ -22,7 +28,7 @@ WebAuthn currently provides two UI flows for sign-in:
 
 The `preferImmediatelyAvailable` option on mobile platforms provides a lower-friction flow when there is an eligible credential. In that case it immediately displays UI containing available credentials, but if no credential is available then it returns an error so that the calling application can provide alternative sign-in methods. This is similar to conditional UI on the web, but in that case the relying party does not learn whether a credential is available and therefore has to provide all sign-in options on a single surface.
 
-For a site where only a fraction of users have WebAuthn credentials, WebAuthn has no great answer for sites that want to implement a “Sign-in” button. We ultimately also want to design an API to help realize the original design of Credential Management and support sites making `get()` requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
+For a site where only a fraction of users have WebAuthn credentials, WebAuthn has no great answer for sites that want to implement a “Sign-in” button. This also helps us move toward the original design of Credential Management API and support sites making `get()` requests that accept credentials of any of several supported types, including WebAuthn, passwords, and federation.
 
 ![Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.](https://github.com/user-attachments/assets/f4442367-4ce8-4096-90f8-89ac65837619)
 
@@ -36,7 +42,7 @@ Immediate is useful in many of the same situations that Conditional UI is, or ca
 
 Conditional UI has proven helpful to users on such UI, because autofill highlights easy sign-in options. Immediate, however, negates the need to show that at all.
 
-#### Is this polyfillable?
+#### Is this a polyfillable experience without adding a new mode?
 Aside from typical existing sign-in experiences, many sites use more streamlined flows. There is also a question of how closely a site can build an Immediate-like experience using Conditional UI. The image below is an imagining of a dynamic sign-in widget drawn by the page, using Conditional UI.
 <p align="center">
 <img width="500" height="281" alt="A minimal sign-in widget containing a username field and an account recovery option. There is an autofill popup over it offering a passkey and a federated login option." src="https://github.com/user-attachments/assets/6cbb9898-e10c-44a2-b941-0fec4f4a74ad" />
@@ -166,7 +172,17 @@ Here's how the relying party could use the new API to achieve this:
 
 ## Privacy considerations
 
-Currently the RP does not have a way to learn about the availability of WebAuthn credentials until the user interacts with browser API, authorizing the generation of an assertion. Under this proposal that would change, enabling the RP to learn about the presence of immediately available credentials without such an authorization. It would not learn any information about the credentials until the assertion is returned, but the single bit available from the API returning immediately with a `NotAllowedError`, or having a long delay due to UI being shown to the user, represents a relaxation of WebAuthn privacy protections.
+Currently the RP does not have a way to learn about the availability of WebAuthn credentials until the user interacts with browser API, authorizing the generation of an assertion. Under this proposal that would change, enabling the RP to learn about the presence of immediately available credentials without such an authorization. This is because if UI is shown, the site can detect that by measuring the time before the promise resolves.
+
+Specifically:
+* If UI is shown, the promise takes more than a short time to resolve, indicating that the user is being offered sign-in credentials for the site. If the user chooses not to select a credential for sign-in, the site still obtain the information that at least one credential exists.
+* If no UI is shown, the promise returns quickly. This can indicate that the user has no credential, although there are other reasons why UI might not have been shown so the conclusion would be less clear.
+
+The site would not learn any information about the contents of a credential (in particular, any identifying information) unless and until an assertion is returned (providing user consent), but the single bit available from the API returning immediately with a `NotAllowedError`, or having a long delay due to UI being shown to the user, represents a relaxation of WebAuthn privacy protections.
+
+Potential consequences of this include:
+* User fingerprinting risk -- e.g. a single bit of information about a client can be combined with other available client-distinguishing information to attempt to identify users
+* Sites pressuring users with accounts to sign in -- there is a potential for sites to offer different experiences for users who don't have accounts compared to those who do have an account and have not signed in
 
 We propose the following measures to mitigate the potential for abuse of that relaxation:
 
@@ -174,9 +190,15 @@ We propose the following measures to mitigate the potential for abuse of that re
 
 To mitigate silent probing of credential availability and fingerprinting, we will require a user gesture before this API call can be made. The user gesture could be [any transient user activation](https://developer.mozilla.org/en-US/docs/Web/API/UserActivation). In particular this requirement makes it difficult for a site to do many calls with varying RP IDs.
 
+### **User manually clearing cookies**
+
+If a user has manually cleared cookies for a given site (or all sites), and then subsequently visits that site, any immediate mediation request should throw `NotAllowedError`. The user agent should take this as a signal that the user does not want to be signed in at this time, and (for the purpose of immediate requests) behave the same as if the user does not have any credentials available. A call made while in this state should be indistinguishable to the site from a call made where no credentials exist, even using precise timing measurements.
+
+If the user signs in to that site via a non-immediate use of passkeys or another browser-visible sign-in method, then immediate would subsequently behave normally.
+
 ### **Incognito and private sessions**
 
-In incognito or private browsing sessions, any immediate mediation request should throw `NotAllowedError`. To avoid incognito fingerprinting, this response can be delayed by the browser to simulate the browser fetching credential metadata from the system.
+In incognito or private browsing sessions, any immediate mediation request should throw `NotAllowedError`. This is similar to the user having manually cleared cookies. To avoid incognito fingerprinting, this response can be delayed by the browser to simulate the browser fetching credential metadata from the system. A call made in an private session should be indistinguishable to the site from a call made in a normal session where no credentials exist, even using precise timing measurements.
 
 ### **Request with allowlists**
 
