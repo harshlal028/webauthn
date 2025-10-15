@@ -50,31 +50,31 @@ When a relying party observes an RPK they have not seen before, it indicates tha
 
 If the relying party has seen the same RPK on a prior create or get call, it indicates that either the passkey is coming from the same device, or another device for which the credential manager has seen phishing-resistant signals linking it to the original device. This is a strong signal to the RP that trustworthiness of the original device can be considered when evaluating trust for the current device.
 
-Relying parties request an RPK by requesting the relationshipPublicKey extension on either a create or a get call:
+Relying parties request an CMTG key by requesting the credentialManagerTrustGroupKey extension on either a create or a get call:
 
 ```javascript
 const cred = await navigator.credentials.get({
   publicKey: {
     challenge: ...,
     extensions: {
-      relationshipPublicKey: true  /* also works for .create */
+      credentialManagerTrustGroupKey: true  /* also works for .create */
     }
   }
 });
 ```
 
-The relationshipPublicKey extension is an [authenticator extension](https://www.w3.org/TR/webauthn-3/#authenticator-extension), and will have two outputs:
+The `credentialManagerTrustGroupKey` extension is an [authenticator extension](https://www.w3.org/TR/webauthn-3/#authenticator-extension), and will have two outputs:
 
-1. The public key of the RPK will be present in the [authenticator extension outputs](https://www.w3.org/TR/webauthn-3/#authenticator-extension-output).  
-2. A signature proving possession of the RPK private key will be In the [unsigned extension outputs](https://www.w3.org/TR/webauthn-3/#unsigned-extension-outputs).
+1. The public key of the CMTG will be present in the [authenticator extension outputs](https://www.w3.org/TR/webauthn-3/#authenticator-extension-output).  
+2. A signature proving possession of the CMTG private key will be In the [unsigned extension outputs](https://www.w3.org/TR/webauthn-3/#unsigned-extension-outputs).
 
 RPKs and their private keys are managed by credential managers, but only synced under this stricter criteria: RPK private keys are only synced between devices with strong non-remote relationships.
 
-Each RPK is associated with a single passkey, i.e. the same RPK is never shared between different passkeys, nor, consequently, between different relying parties. On the other hand, a single passkey may have multiple RPKs associated with it. 
+Each RPK is associated with a single passkey, i.e. the same CMTG key is never shared between different passkeys, nor, consequently, between different relying parties. On the other hand, a single passkey may have multiple RPKs associated with it. 
 
-A credential manager that supports RPK will always return one if requested. If no RPK private key exists for the selected passkey on the current device, the credential manager will create a new one.
+A credential manager that supports RPK will always return one if requested. If no CMTG private key exists for the selected passkey on the current device, the credential manager will create a new one.
 
-Note: Credential manager implementations may choose to create RPKs up front, but as from the perspective of relying parties, a good mental model is still that they are created on demand on new devices that don't have any strong relationships to other devices.
+Note: Credential manager implementations may choose to create CMTG keys up front, but as from the perspective of relying parties, a good mental model is still that they are created on demand on new devices that don't have any strong relationships to other devices.
 
 As the credential manager observes strong non-remote relationships between devices, it then transfers RPK private keys between devices as appropriate. It is possible that a device ends up with multiple RPKs for a given passkey. In this case, the authenticator will select one of them when RPK is requested. The logic for that selection is left to credential managers, but in general they are expected to select a key in a consistent manner (i.e. not at random). For example, an implementation may choose to always select the oldest available RPK that has been presented to the relying party before.
 
