@@ -1,4 +1,4 @@
-# Explainer: Relationship Public Key
+# Explainer: Credential Manager Trust Group Key
 
 Last Updated: 2025-10-08
 
@@ -78,7 +78,7 @@ Note: Credential manager implementations may choose to create RPKs up front, but
 
 As the credential manager observes strong non-remote relationships between devices, it then transfers RPK private keys between devices as appropriate. It is possible that a device ends up with multiple RPKs for a given passkey. In this case, the authenticator will select one of them when RPK is requested. The logic for that selection is left to credential managers, but in general they are expected to select a key in a consistent manner (i.e. not at random). For example, an implementation may choose to always select the oldest available RPK that has been presented to the relying party before.
 
-RPKs are optional, i.e. RPs that don't need the additional signal can simply not request the RPK extension, and there is nothing new to verify.
+RPKs are optional, i.e. RPs that don't need the additional signal can simply not request the CMTG extension, and there is nothing new to verify.
 
 ## Alternatives considered and questions
 
