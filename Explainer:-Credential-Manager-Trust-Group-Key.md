@@ -1,6 +1,4 @@
-# Explainer: Credential Manager Trust Group Key
-
-Last Updated: 2025-10-08
+Last Updated: 2025-10-15
 
 ## Objective
 
