@@ -80,6 +80,8 @@ The order of the identifiers and attributes is important and serves as a browser
 
 The chosen identifier will be used as the credential's user [`name`](https://w3c.github.io/webauthn/#dom-publickeycredentialentity-name) and [`displayName`](https://w3c.github.io/webauthn/#dom-publickeycredentialuserentity-displayname) attributes, so there is no need for developers to pass a `user.name` or `user.displayName` value.
 
+User agents already know their users very well. Thus, attributes will not be sourced from the authenticator, but from the user agent, similar to how autofill works.
+
 ### Syncing
 
 Attributes will only be supported for requests with `requirePlatformBackupEligibleCredential` set to `true` (todo: add link). A syncing platform authenticator is required because we don't want users to end up without being able to sign in to relying parties after their devices break, with hybrid excluded because the hybrid user experience is worse than a traditional password based form.
