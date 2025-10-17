@@ -1,28 +1,23 @@
-# Explainer: WebAuthn account creation API
+# Explainer: WebAuthn `requestUserInfo`
 
-**Author**: Nina Satragno <nsatragno@google.com>
+**Author**: Nina Satragno <nso@google.com>
 
 **Status**: Draft
 
 ## Summary
-A new API that provides a user's identifier and name alongside a new passkey to aid relying parties in account creation.
+A new option for credential creation that requests a user's identifier and name alongside the credential to aid relying parties in account creation.
 
 ## Background and motivation
 We are seeing widespread adoption of passkeys on all sorts of relying parties, with far better outcomes than traditional password based sign-ins. Passwords are starting to be displaced in some applications, with Microsoft [allowing users to delete their passwords](https://support.microsoft.com/en-us/account-billing/how-to-go-passwordless-with-your-microsoft-account-674ce301-3574-4387-a93d-916751764c43), and Apple [providing an API that lets apps mark passwords as unused](https://developer.apple.com/documentation/authenticationservices/ascredentialproviderviewcontroller/reportunusedpasswordcredential(fordomain:username:)?language=objc).
 
 However, we aren't seeing relying parties start their users with passkeys from the get-go. Every sign up flow out there is based on either federation, email verification, or passwords. The latter two usually involve cumbersome form filling where the best help user agents can give the user is based on autofill heuristics. Federation often requires fewer steps, but it comes at an additional privacy cost, and a dependency on identity provider's account policies that not every relying party wants. With federation, relying parties also have to individually support identity providers.
 
-The Chrome team proposes a set of additions to the WebAuthn API that will enable streamlining the account creation process. Developers who integrate the API will obtain a set of user attributes and a passkey they can be sure syncs. The design is such that it can be readily extended to support verified emails. We hope that this makes signing up a breeze for users, drives adoption across all passkey providers, and moves us closer to a truly passwordless world.
+The Chrome WebAuthn team proposes an addition to the WebAuthn API that will enable streamlining the account creation process. Developers who integrate the API will obtain a passkey and a set of user attributes. The design is such that it can be readily extended to support verified emails. We hope that this makes signing up a breeze for users, drives adoption across all passkey providers, and moves us closer to a truly passwordless world.
+
 ## Design
-### Syncing
-Today, when a relying party requests creation of a passkey, there is no way to indicate that a passkey should sync. Relying parties can only tell after the passkey was created whether it can sync or not by looking at the backup eligibility bit.
-
-This is undesirable if we want the passkey to be the main way to sign in, so we need to address this point first. Thus, we propose adding a new field to the `AuthenticatorSelectionCriteria` dictionary `requirePlatformBackupEligibleCredential`. This field will be similar to `authenticatorAttachment: "platform"` but will additionally filter out platform authenticators that don't support syncing. Setting this field will give relying parties a guarantee that they can rely on just having the passkey for authentication.
-
-We are intentionally not adding a client hint, as we believe this should be a strong requirement.
 
 ### Requesting attributes
-Relying parties will be able to pass a list of predetermined information to obtain from a request on a new `requestUserInfo` `PublicKeyCredentialUserEntity` attribute. These will be divided into identifiers and attributes. Sites may ask for one of a number of possible identifiers, but get only one. Conversely, all attributes requested are considered required.
+Relying parties will be able to pass a list of predetermined information to obtain in a request via a new `requestUserInfo` `PublicKeyCredentialUserEntity` attribute. These will be divided into identifiers and attributes. Sites may ask for one of a number of possible identifiers, but they may get only one. Conversely, all attributes requested are considered required.
 
 The initial list of identifiers is:
 * phone
@@ -79,52 +74,58 @@ userInfo: {
 },
 ```
 
-The order of the attributes is important and serves as a browser hint for displaying on the UI. The chosen identifier will be used as the credential's user `name` and `displayName` attributes.
+The order of the identifiers and attributes is important and serves as a browser hint for displaying on the UI.
 
-Attributes will only be supported for requests with `requirePlatformBackupEligibleCredential` set to `true`. Syncing is required because we don't want users to end up without being able to sign in to relying parties after their devices break, and a platform authenticator (as opposed to hybrid) because the hybrid user experience is worse than a traditional form.
+### [`user.name`](https://w3c.github.io/webauthn/#dom-publickeycredentialentity-name) and [`user.displayName`](https://w3c.github.io/webauthn/#dom-publickeycredentialuserentity-displayname)
+
+The chosen identifier will be used as the credential's user [`name`](https://w3c.github.io/webauthn/#dom-publickeycredentialentity-name) and [`displayName`](https://w3c.github.io/webauthn/#dom-publickeycredentialuserentity-displayname) attributes, so there is no need for developers to pass a `user.name` or `user.displayName` value.
+
+### Syncing
+
+Attributes will only be supported for requests with `requirePlatformBackupEligibleCredential` set to `true` (todo: add link). A syncing platform authenticator is required because we don't want users to end up without being able to sign in to relying parties after their devices break, with hybrid excluded because the hybrid user experience is worse than a traditional password based form.
 
 ### Feature detection
-The availability of the new parameters and list of attributes must be detectable by the relying party. We'll extend `ClientCapabilities` to reflect each of them:
+The availability of this functionality and list of attributes must be detectable by the relying party. We'll extend `ClientCapabilities` to reflect each attribute:
 
-* `isPlatformBackupEligibleAuthenticatorAvailable`
+* `userInfoIdentifierPhone`
+* `userInfoIdentifierEmail`
+* `userInfoAttributeName`
   
-  This will both indicate that the browser understands the option and that such an authenticator is available.
-* `userInfoIdentifierPhone`, `userInfoIdentifierEmail`, `userInfoAttributeName`
-  
-  These will list the list of user attributes that may be requested. If at least one of these is present, then requestUserInfo will be usable.
+These will list the user attributes that may be requested. If at least one of these is present, then `requestUserInfo` will be usable.
+
 
 ### Error handling
 There will be two distinguishable error types returned by the API:
-* `InvalidStateError` when the user cancels out of the dialog. This should be interpreted as the user does not want to sign up for the site, by e.g. redirecting the user to the homepage.
+* `InvalidStateError` when the user cancels out of the dialog. This should be interpreted as the user does not want to sign up for the site, by e.g., redirecting the user to the homepage.
 
-* `NotAllowedError` for all other errors where the user may still want to create an account but the browser can't do it either because there are no suitable authenticators available or there was some problem with the authenticator. In this case, the site should redirect the user to a traditional form based account creation form.
+* `NotAllowedError` for all other errors where the user may still want to create an account but the browser can't do it either because there are no suitable authenticators available or there was some problem with the authenticator. In this case, the site should redirect the user to a traditional form-based account creation form.
 
 ### User activation requirement
-Unlike regular WebAuthn requests, this API will actually reveal information about a user who's never been to a site before. To avoid making browsing the web noisier than it already is, this API will be gated by a user activation requirement.
+Unlike regular WebAuthn requests, this API will reveal some information about a user who's never been to a site before. To avoid making browsing the web noisier than it already is, this API will be gated by a user activation requirement.
 
 ### UI redressing protection
-Unlike regular WebAuthn requests, this API will reveal some information about the user. User agents should take this into account when designing their user interfaces.
+Unlike regular WebAuthn requests, this API will reveal some information about a user who's never been to a site before. User agents should take [UI redressing](https://w3c.github.io/webauthn/#ui-redressing) ("clickjacking") into account when designing their user interfaces.
 
 ### Testing
-The virtual authenticator will be extended to support seeding user attributes.
+The [virtual authenticator](https://w3c.github.io/webauthn/#sctn-automation) will be extended to support seeding user attributes.
 
 ### Cross origin iframes
-It's already possible to create passkeys on cross origin iframes with the correct permission policy. Perhaps then this feature should probably be supported in that scenario as well.
+It's already possible to create passkeys on cross origin iframes with the correct permissions policy. Perhaps then this feature should probably be supported in that scenario as well.
 
 ## Relying party actions
-Relying parties should first feature detect the API. If either the API or the attributes they require are not supported, the relying party should proceed with a form based sign-up form.
+Relying parties should first feature detect the API. If either the API or the attributes they require are not supported, the relying party should proceed with a form-based sign-up form.
 
 Assuming support, relying parties should install a click handler on their "sign up" button. On click, they'll either fetch a challenge and user ID or generate them on the client, then call the WebAuthn API with the new parameters.
 
 ```javascript
-// sign_in_button_handler.js:
+// sign_up_button_handler.js:
 
 // Feature detection.
 let capabilities = await PublicKeyCredential.getClientCapabilities();
 if (!capabilities["isPlatformBackupEligibleAuthenticatorAvailable"] ||
     !capabilities["userInfoIdentifierEmail"] ||
     !capabilities["userInfoAttributeName"]) {
-  proceedWithFormBasedSignIn();
+  proceedWithFormBasedSignUp();
   return;
 }
 
@@ -155,12 +156,16 @@ try {
   });
 } catch (error) {
   if (error.name === "NotAllowedError") {
-    // The user cancelled or failed to verify their identity.
-    handleUserCancelled();
+    // The user failed to verify their identity or some other error occurred.
+    showErrorThenProceedWithFormBasedSignUp();
     return;
   }
+  if (error.name === "InvalidStateError") {
+    // The user does not want to sign up.
+    goToHomeScreen();
+  }
   // Getting here would likely indicate a bug.
-  return;
+  throw error;
 }
 
 let response = await fetch("new-user", { method: "POST", body: credential.toJson() });
