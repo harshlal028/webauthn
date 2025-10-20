@@ -68,6 +68,8 @@ userInfo: {
   },
   attributes: {
     name: {
+      dir: "ltr",
+      language: "en-CA",
       value: "Marisa Kirisame",
     },
   }
