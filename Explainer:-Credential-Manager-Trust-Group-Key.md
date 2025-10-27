@@ -70,7 +70,7 @@ CMTG Keys and their private keys are managed by credential managers, but only sy
 
 Each CMTG Key is associated with a single passkey, i.e. the same CMTG Key is never shared between different passkeys, nor, consequently, between different relying parties. On the other hand, a single passkey may have multiple CMTG Keys associated with it. 
 
-A credential manager that supports CMTG Keys will always return one if requested. If no CMTG private key exists for the selected passkey on the current device, the credential manager will create a new one.
+A credential manager that supports CMTG Keys will usually return one if requested. If no CMTG private key exists for the selected passkey on the current device, the credential manager will usually create a new one. A credential manager may not return a CMTG Key if e.g. it relies on the network to do so, and the network is down.
 
 Note: Credential manager implementations may choose to create CMTG keys up front, but as from the perspective of relying parties, a good mental model is still that they are created on demand on new devices that don't have any strong relationships to other devices.
 
