@@ -2,7 +2,10 @@
 
 **Author**: Nina Satragno <nso@google.com>
 
-**Status**: Draft
+**Status**: Retired
+
+## Status
+This proposal was retired, see the discussion at https://github.com/w3c/webauthn/issues/2342.
 
 ## Summary
 A new `AuthenticatorSelectionCriteria` parameter that lets a relying party indicate that only [platform authenticators](https://w3c.github.io/webauthn/#platform-authenticators) that support [backing up credentials](https://w3c.github.io/webauthn/#sctn-credential-backup) (i.e. syncing) should be eligible.

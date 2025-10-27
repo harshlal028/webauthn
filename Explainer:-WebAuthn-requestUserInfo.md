@@ -84,10 +84,6 @@ The chosen identifier will be used as the credential's user [`name`](https://w3c
 
 User agents already know their users very well. Thus, attributes will not be sourced from the authenticator, but from the user agent, similar to how autofill works.
 
-### Syncing
-
-Attributes will only be supported for requests with `requirePlatformBackupEligibleCredential` set to `true` (todo: add link). A syncing platform authenticator is required because we don't want users to end up without being able to sign in to relying parties after their devices break, with hybrid excluded because the hybrid user experience is worse than a traditional password based form.
-
 ### Feature detection
 The availability of this functionality and list of attributes must be detectable by the relying party. We'll extend `ClientCapabilities` to reflect each attribute:
 
@@ -126,8 +122,7 @@ Assuming support, relying parties should install a click handler on their "sign 
 
 // Feature detection.
 let capabilities = await PublicKeyCredential.getClientCapabilities();
-if (!capabilities["isPlatformBackupEligibleAuthenticatorAvailable"] ||
-    !capabilities["userInfoIdentifierEmail"] ||
+if (!capabilities["userInfoIdentifierEmail"] ||
     !capabilities["userInfoAttributeName"]) {
   proceedWithFormBasedSignUp();
   return;
@@ -152,11 +147,6 @@ try {
           attributes: ["name"],
         }
       },
-      authenticatorSelection: {
-        requireBackupEligibleCredential: true,
-        residentKey: "required",
-        userVerification: "preferred",
-     },
   });
 } catch (error) {
   if (error.name === "NotAllowedError") {
