@@ -48,14 +48,14 @@ When a relying party observes an CMTG Key they have not seen before, it indicate
 
 If the relying party has seen the same CMTG Key on a prior create or get call, it indicates that either the passkey is coming from the same device, or another device for which the credential manager has seen phishing-resistant signals linking it to the original device. This is a strong signal to the RP that trustworthiness of the original device can be considered when evaluating trust for the current device.
 
-Relying parties request an CMTG key by requesting the credentialManagerTrustGroupKey extension on either a create or a get call:
+Relying parties request an CMTG key by requesting the `cmtgKey` extension on either a create or a get call:
 
 ```javascript
 const cred = await navigator.credentials.get({
   publicKey: {
     challenge: ...,
     extensions: {
-      credentialManagerTrustGroupKey: true  /* also works for .create */
+      cmtgKey: true  /* also works for .create */
     }
   }
 });
