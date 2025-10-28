@@ -35,6 +35,8 @@ navigator.credentials.create({
   publicKey: {
     user: {
       id: ...,
+      name: "",  // Intentionally left empty.
+      displayName: "",  // Intentionally left empty.
       requestUserInfo: {
         identifiers: ["phone", "email"],
         attributes: ["name"],
@@ -141,7 +143,8 @@ try {
       rp: { name: "Example RP" },
       user: { 
         id: serverParams.userId,
-        // Note no name or displayName.
+        name: "",  // Intentionally left empty.
+        displayName: "",  // Intentionally left empty.
         requestUserInfo: {
           identifiers: ["email", "phone"],  // name & displayName will match email/phone.
           attributes: ["name"],
