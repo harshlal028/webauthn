@@ -195,12 +195,6 @@ We propose the following measures to mitigate the potential for abuse of that re
 
 To mitigate silent probing of credential availability and fingerprinting, we will require a user gesture before this API call can be made. The user gesture could be [any transient user activation](https://developer.mozilla.org/en-US/docs/Web/API/UserActivation). In particular this requirement makes it difficult for a site to do many calls with varying RP IDs.
 
-### **User manually clearing cookies**
-
-If a user has manually cleared cookies for a given site (or all sites), and then subsequently visits that site, any immediate mode request should throw `NotAllowedError`. The user agent should take this as a signal that the user does not want to be signed in at this time, and (for the purpose of immediate requests) behave the same as if the user does not have any credentials available. A call made while in this state should be indistinguishable to the site from a call made where no credentials exist, even using precise timing measurements.
-
-If the user signs in to that site via a non-immediate use of passkeys or another browser-visible sign-in method, then immediate would subsequently behave normally.
-
 ### **Incognito and private sessions**
 
 In incognito or private browsing sessions, any immediate mode request should throw `NotAllowedError`. This is similar to the user having manually cleared cookies. To avoid incognito fingerprinting, this response can be delayed by the browser to simulate the browser fetching credential metadata from the system. A call made in an private session should be indistinguishable to the site from a call made in a normal session where no credentials exist, even using precise timing measurements.
