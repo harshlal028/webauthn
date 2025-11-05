@@ -3,15 +3,17 @@ Adem Derinel <<derinel@google.com>>
 
 Ken Buchanan <<kenrb@chromium.org>>
 
-Last updated: 05-Sep-2025
+Last updated: 05-Nov-2025
+
+_Most recent edit removed `immediate` as a `mediation` value, and added a new field called `uiMode`._
 
 ## Summary
 
-We propose an “immediate” mediation modality for WebAuthn and password `CredentialsContainer::get()` requests that mirrors the `preferImmediatelyAvailable` API properties on Android and iOS. This modality fails promptly if no credentials are immediately available, and thus allows sites to direct users to fallback sign-in methods in that case.
+We propose an “immediate” modality for WebAuthn and password `CredentialsContainer::get()` requests that mirrors the `preferImmediatelyAvailable` API properties on Android and iOS. This modality fails promptly if no credentials are immediately available, and thus allows sites to direct users to fallback sign-in methods or non-signed-in experiences in that case.
 
 ## Goal
 
-This feature aims to enable a sign-in flow with passkeys and managed passwords that does not require a user to visit a traditional sign-in page containing multiple sign-in methods for the user to choose between (such as a username/password form, multiple federated sign-in options, a recovery button, etc), while at the same time not changing the sign-in experience for users for whom passkeys or managed password are not available. When one or more such credential are available, a user who has reached a sign-in moment in their interaction with a site (such as, for example, by clicking a "Sign In" button) will see a browser dialog containing a list of existing eligible credentials for that site. When the user confirms the credential to use (or selects a credential, if multiple are shown), they can be immediately signed in.
+This feature aims to enable a sign-in flow with passkeys and managed passwords that does not require a user to visit a traditional sign-in page containing multiple sign-in methods for the user to choose between (such as a username/password form, multiple federated sign-in options, a recovery button, etc), while at the same time not changing the sign-in experience for users for whom passkeys or managed passwords are not available. When one or more such credential are available, a user who has reached a sign-in moment in their interaction with a site (such as, for example, by clicking a "Sign In" button) will see a browser dialog containing a list of existing eligible credentials for that site. When the user confirms the credential to use (or selects a credential, if multiple are shown), they can be immediately signed in.
 
 The use cases that this best supports are where a user has an account on the site, but the site does not know the identity of the user through previously set cookies. Some of the reasons why this commonly happens are:
 * Users create an account and passkey for a site on one device, and want to sign in to the site on a different device, where the passkey has been synced by their passkey provider.
@@ -35,7 +37,7 @@ For a site where only a fraction of users have WebAuthn credentials, WebAuthn ha
 *Current modal WebAuthn flow for a user with no local WebAuthn credentials. Whether it is the modal flow or the conditional flow, this may result in offering hybrid flow to the user.*
 
 ### Comparison to Conditional UI
-Immediate is useful in many of the same situations that Conditional UI is, or can be, already used. Specifically: If the site is providing the user a chance to sign in, and it doesn't already know what authentication method the user will use, then both of these mediation options are useful. The advantage that Immediate provides is that it allows sign-in to be offered without presenting the user with all supported authentication options. Typically today this is a form with one or two input fields, and some number of alternatives.
+Immediate is useful in many of the same situations that Conditional UI is, or can be, already used. Specifically: If the site is providing the user a chance to sign in, and it doesn't already know what authentication method the user will use, then both of these modalities options are useful. The advantage that Immediate provides is that it allows sign-in to be offered without presenting the user with all supported authentication options. Typically today this is a form with one or two input fields, and some number of alternatives.
 <p align="center">
 <img width="500" height="500" alt="Typical sign-in widget with username/password fields, a passkey button, a federated login button, and a password recovery option" src="https://github.com/user-attachments/assets/a4380abf-75af-45e9-93f5-d3c5e8ad6b87" />
 </p>
@@ -71,22 +73,24 @@ There are numerous situations where a user can be interacting with a site and re
 
 ## API
 
-> Note from authors: We have received feedback suggesting that adding a value to the `mediation` enum might restrict use cases with some credential types. In particular, credentials such as FedCM or passwords have different client behaviour when the RP sets `mediation: "required"` vs `mediation: "optional"`. If we support combining those credentials with passkeys in `mediation: "immediate"`, RPs will have less control over non-passkey credential mediation on the associated UI than they currently do. There is ongoing discussion over whether a new field should be added.
+We propose adding a new field to [CredentialRequestOptions](https://www.w3.org/TR/credential-management-1/#dictdef-credentialrequestoptions) called `uiMode`. `uiMode` initially has two values:
+* `active`, which is the default and provide the current UI behavior given the specified `mediation` value, and
+* `immediate`, which provides the UI behavior described below.
 
-We propose a mediation type, `immediate` for `navigator.credentials.get()`.
+> Note: Previous revisions of this explainer suggested that `immediate` could be a new value for the `[CredentialMediationRequirement](https://www.w3.org/TR/credential-management-1/#enumdef-credentialmediationrequirement)` enumeration, which would match how `conditional` is used. However, we have some concerns that this might limit flexibility as different UI options are added and also as more credential types become possible to be displayed together. The original intent of `mediation` was to specify whether or not the browser should show sign-in UI to the user. Adding `uiMode` to `CredentialRequestOptions` provides a way to specify what UI should be shown, in the cases where it is shown.
 
-When such an option is set, the returned promise resolves with `NotAllowedError` when there are no locally-available credentials; otherwise, the browser handles the authentication ceremony as if there were no mediation property set. Browsers are always free to return `NotAllowedError` if they see fit. (See Privacy section, below.)
+When `uiMode` is `immediate`, the returned promise resolves with `NotAllowedError` when there are no locally-available credentials; otherwise, the browser handles the authentication ceremony with those credentials as usual. Browsers can also throw `NotAllowedError` for other reasons, such as time constraints. (See Privacy section, below.)
 
 ```javascript
 // Use `getClientCapabilities` for feature detection
-let immediateMediationAvailable = false;
+let immediateModeAvailable = false;
 if (window.PublicKeyCredential && PublicKeyCredential.getClientCapabilities) {
   const capabilities = await PublicKeyCredential.getClientCapabilities();
-  // `immediateGet` is a new capability for immediate mediation:
-  immediateMediationAvailable = capabilities.immediateGet === true;
+  // `immediateGet` is a new capability for immediate mode:
+  immediateModeAvailable = capabilities.immediateGet === true;
 }
 
-if (immediateMediationAvailable) {
+if (immediateModeAvailable) {
   try {
     const cred = await navigator.credentials.get({
       publicKey: {
@@ -94,7 +98,7 @@ if (immediateMediationAvailable) {
         rpId: 'example.com',
         allowCredentials: [],
       },
-      mediation: 'immediate'
+      uiMode: 'immediate'
     });
   } catch (error) {
     if (error.name === 'NotAllowedError') {
@@ -119,7 +123,7 @@ When security key credential enumeration is not available, the sign-in experienc
 
 On supported browsers, password credentials (i.e. `navigator.credentials.get({password: true})`) return immediately when there are no passwords available.
 
-Federated credentials and passwords can also support immediate mediation if needed to make a more coherent sign-in flow. With the increased support, relying parties can choose which credential type they want to use as the “primary” sign-in flow and implement the follow-up authentication methods as backup.
+Federated credentials and passwords can also support immediate mode if needed to make a more coherent sign-in flow. With the increased support, relying parties can choose which credential type they want to use as the “primary” sign-in flow and implement the follow-up authentication methods as backup.
 
 While not addressed in this explainer, a future direction of requesting WebAuthn, federated and password credentials together could look like
 
@@ -134,7 +138,8 @@ try {
     },
     identity: { ... },
     password: true,
-    mediation: "immediate"
+    mediation: "required",
+    uiMode: "immediate"
   });
   // Site will also show a button to trigger a modal flow
   // to handle Incognito and security key users
@@ -157,7 +162,7 @@ The relying party’s goal is to provide a frictionless sign-in experience, mini
 Here's how the relying party could use the new API to achieve this:
 
 1. User navigates to the main page of the website (e.g. a shopping page).  
-2. Upon page load, and after a user gesture (such as clicking a "Sign In" button), the relying party calls `navigator.credentials.get` with a `PublicKeyCredentialRequestOptions` object and `mediation: ”immediate”`. They may also include `password: true` in the request.  
+2. Upon page load, and after a user gesture (such as clicking a "Sign In" button), the relying party calls `navigator.credentials.get` with a `PublicKeyCredentialRequestOptions` object and `uiMode: ”immediate”`. They may also include `password: true` in the request.  
 3. The browser checks the local authenticators for any local credentials. Ideally, this would be near-instantaneous.  
 4. If there are no local credentials  
    1. The browser throws a `NotAllowedError` to the relying party.  
@@ -192,13 +197,13 @@ To mitigate silent probing of credential availability and fingerprinting, we wil
 
 ### **User manually clearing cookies**
 
-If a user has manually cleared cookies for a given site (or all sites), and then subsequently visits that site, any immediate mediation request should throw `NotAllowedError`. The user agent should take this as a signal that the user does not want to be signed in at this time, and (for the purpose of immediate requests) behave the same as if the user does not have any credentials available. A call made while in this state should be indistinguishable to the site from a call made where no credentials exist, even using precise timing measurements.
+If a user has manually cleared cookies for a given site (or all sites), and then subsequently visits that site, any immediate mode request should throw `NotAllowedError`. The user agent should take this as a signal that the user does not want to be signed in at this time, and (for the purpose of immediate requests) behave the same as if the user does not have any credentials available. A call made while in this state should be indistinguishable to the site from a call made where no credentials exist, even using precise timing measurements.
 
 If the user signs in to that site via a non-immediate use of passkeys or another browser-visible sign-in method, then immediate would subsequently behave normally.
 
 ### **Incognito and private sessions**
 
-In incognito or private browsing sessions, any immediate mediation request should throw `NotAllowedError`. This is similar to the user having manually cleared cookies. To avoid incognito fingerprinting, this response can be delayed by the browser to simulate the browser fetching credential metadata from the system. A call made in an private session should be indistinguishable to the site from a call made in a normal session where no credentials exist, even using precise timing measurements.
+In incognito or private browsing sessions, any immediate mode request should throw `NotAllowedError`. This is similar to the user having manually cleared cookies. To avoid incognito fingerprinting, this response can be delayed by the browser to simulate the browser fetching credential metadata from the system. A call made in an private session should be indistinguishable to the site from a call made in a normal session where no credentials exist, even using precise timing measurements.
 
 ### **Request with allowlists**
 
@@ -206,7 +211,7 @@ Requests with allowlists should throw `NotAllowedError`. If a relying party quer
 
 ### **Cancellation**
 
-Setting the `signal`  parameter on a request with immediate mediation is invalid as sites should not be able to programmatically dismiss any browser UI.
+Setting the `signal` parameter on a request with immediate mode is invalid as sites should not be able to programmatically dismiss any browser UI.
 
 ## Similar systems
 
